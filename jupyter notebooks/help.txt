@@ -1,2 +1,0 @@
-Install google drive extension : 
-https://towardsdatascience.com/integrate-jupyterlab-with-google-drive-98d13e340c63
