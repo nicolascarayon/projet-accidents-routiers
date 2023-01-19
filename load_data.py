@@ -179,6 +179,7 @@ def load_lieux(folder_path, start_year, end_year):
 
     return lieux
 
+
 def load_usagers(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -202,7 +203,7 @@ def load_usagers(folder_path, start_year, end_year):
     etatp : etatp
     """
     usagers = {}
-    for year in range(start_year, end_year+1):
+    for year in range(start_year, end_year + 1):
         if year == 2005:
             usagers[2005] = pd.read_csv(folder_path + 'usagers_2005.csv', sep=',')
         if year == 2006:
@@ -240,6 +241,7 @@ def load_usagers(folder_path, start_year, end_year):
 
     return usagers
 
+
 def load_vehicules(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -259,7 +261,7 @@ def load_vehicules(folder_path, start_year, end_year):
     occutc : nombre d’occupants dans le transport en commun
     """
     vehic = {}
-    for year in range(start_year, end_year+1):
+    for year in range(start_year, end_year + 1):
         if year == 2005:
             vehic[2005] = pd.read_csv(folder_path + 'vehicules_2005.csv', sep=',')
         if year == 2006:
