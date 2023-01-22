@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def load_vehic_immat(folder_path, start_year, end_year):
+def load_vehic_immat_gouv(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : vehic = load_vehicles(2019, 2021)
@@ -48,8 +48,7 @@ def load_vehic_immat(folder_path, start_year, end_year):
 
     return vehic
 
-
-def load_caract(folder_path, start_year, end_year):
+def load_caract_gouv(folder_path, start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -113,7 +112,7 @@ def load_caract(folder_path, start_year, end_year):
     return caract
 
 
-def load_lieux(folder_path, start_year, end_year):
+def load_lieux_gouv(folder_path, start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -180,7 +179,7 @@ def load_lieux(folder_path, start_year, end_year):
     return lieux
 
 
-def load_usagers(folder_path, start_year, end_year):
+def load_usagers_gouv(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : usagers = load_usagers(2019, 2021)
@@ -242,7 +241,7 @@ def load_usagers(folder_path, start_year, end_year):
     return usagers
 
 
-def load_vehicules(folder_path, start_year, end_year):
+def load_vehicules_gouv(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : vehicles = load_vehicules(2019, 2021)
@@ -298,3 +297,25 @@ def load_vehicules(folder_path, start_year, end_year):
             vehic[2021] = pd.read_csv(folder_path + 'vehicules-2021.csv', sep=';')
 
     return vehic
+
+def load_data_kagg(folder_path):
+    """Retourne les données dans un dictionnaire de DataFrames dont la clé est le type de donnée
+
+    ex : my_dict = load_data_kagg(my_folder)
+    les données des usagers sont accessibles via la clé 'usagers' : df_usagers = my_dict['usagers']
+    les clés disponibles sont :
+     - 'caracts'   
+     - 'lieux'
+     - 'usagers'
+     - 'vacances'
+     - 'vehics'
+    """
+    data_dict = { 'caract'  : pd.read_csv(folder_path + 'caracteristics.csv', sep=',', encoding='ISO-8859-1'),
+                  'lieux'    : pd.read_csv(folder_path + 'places.csv', sep=','),
+                  'usagers'  : pd.read_csv(folder_path + 'users.csv', sep=','),
+                  'vacances' : pd.read_csv(folder_path + 'holidays.csv', sep=','),
+                  'vehic'    : pd.read_csv(folder_path + 'vehicles.csv', sep=',')
+                }
+        
+
+    return data_dict
