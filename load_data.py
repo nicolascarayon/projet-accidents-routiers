@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def load_vehic_immat_gouv(folder_path, start_year, end_year):
+def load_vehic_immat(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : vehic = load_vehicles(2019, 2021)
@@ -48,7 +48,7 @@ def load_vehic_immat_gouv(folder_path, start_year, end_year):
 
     return vehic
 
-def load_caract_gouv(folder_path, start_year, end_year):
+def load_caract(folder_path, start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -112,7 +112,7 @@ def load_caract_gouv(folder_path, start_year, end_year):
     return caract
 
 
-def load_lieux_gouv(folder_path, start_year, end_year):
+def load_lieux(folder_path, start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
@@ -179,7 +179,7 @@ def load_lieux_gouv(folder_path, start_year, end_year):
     return lieux
 
 
-def load_usagers_gouv(folder_path, start_year, end_year):
+def load_usagers(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : usagers = load_usagers(2019, 2021)
@@ -241,7 +241,7 @@ def load_usagers_gouv(folder_path, start_year, end_year):
     return usagers
 
 
-def load_vehicules_gouv(folder_path, start_year, end_year):
+def load_vehicules(folder_path, start_year, end_year):
     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
 
     ex : vehicles = load_vehicules(2019, 2021)
