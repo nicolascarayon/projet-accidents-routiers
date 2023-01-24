@@ -20,3 +20,17 @@ def get_labels(varname, value):
             return 'Blessé hospitalisé'
         if value==4:
             return 'Blessé léger'
+
+    if varname == 'catu':
+        if value==1:
+            return 'Conducteur'
+        if value==2:
+            return 'Passager'
+        if value==3:
+            return 'Piéton'
+
+    if varname == 'sexe':
+        if value==1:
+            return 'Masculin'
+        if value==2:
+            return 'Féminin'
