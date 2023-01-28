@@ -1,0 +1,14 @@
+
+- regarder les correlations entre variables (hors target) des tables
+    - usagers
+	- caracteristiques
+    - lieux
+	- vehicules
+	mais je ne m'attends pas a de corrélation forte, je suppose que l'administration fait bien son job et a pensé les variables pour qu'elles soient bien décorrélées
+	
+- regarder les relations gravité/variables des fichiers vehicules + lieux
+		usagers-caractéristiques -> clé : Num_acc
+		usagers-lieux            -> clé : Num_acc
+		usagers-vehicules        -> clé : ['Num_acc', 'num_veh']
+		usagers-vehic-immat      -> clé : ['Num_acc', 'num_veh'] -> id_vehicule?
+	
