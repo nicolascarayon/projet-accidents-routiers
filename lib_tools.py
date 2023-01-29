@@ -469,6 +469,10 @@ def proc_caract_gps(dic_caract):
             df = df.drop(columns=['gps'], axis=1)
     return df
 
+def create_col_age(df):
+    df['age'] = df['an'] - df['an_nais']
+    return df
+
 # Merge DataFrames ------------------------------------------------
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
