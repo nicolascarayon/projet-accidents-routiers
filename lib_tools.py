@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
@@ -154,7 +155,6 @@ def load_data_kagg():
     return data_dict
 
 # REFERENCE VALUES GET -------------------------------------------
-
 def get_labels(varname, value):
     if varname == 'lum':
         if value == 1:
@@ -366,3 +366,102 @@ def get_cl_age(age):
         return '38-53'
     if 53 < age:
         return '>53'
+def preproc_usagers(dic_usagers, chk):
+    df_usagers = concat_df_from_dict(dic_usagers, chk)
+    df_usagers = manage_duplicated(df_usagers, chk)
+
+    return df_usagers
+def preproc_caract(dic_caract, chk):
+    df_caract = concat_df_from_dict(dic_caract, chk)
+    df_caract = manage_duplicated(df_caract, chk)
+    df_caract['an'] = df_caract['an'].replace(
+        to_replace=[5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        value=[2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
+               2015, 2016, 2017, 2018])
+
+    return df_caract
+def preproc_vehic(dic_vehic, chk):
+    # df_vehic = pd.DataFrame(columns=['Num_Acc', 'id_vehicule', 'num_veh', 'senc', 'catv', 'obs', 'obsm',
+    #                                  'choc', 'manv', 'motor', 'occutc'])
+    df_vehic = concat_df_from_dict(dic_vehic, chk)
+    df_vehic = manage_duplicated(df_vehic, chk)
+
+    return df_vehic
+def preproc_lieux(dic_lieux, chk):
+    df_lieux = concat_df_from_dict(dic_lieux, chk)
+    df_lieux = manage_duplicated(df_lieux, chk)
+
+    return df_lieux
+def concat_df_from_dict(dic, chk):
+    [start_year, end_year] = get_start_end_years_from_dic(dic)
+    for year in dic.keys():
+        df = dic[year]
+        if year == start_year:
+            df_final = df
+        else:
+            df_final = pd.concat([df_final, df], ignore_index=True, axis=0)
+    if chk:
+        chk_concat(dic, df_final)
+    return df_final
+
+def manage_duplicated(df, chk):
+    if chk : print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
+    df = df.drop_duplicates()
+    if chk : print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
+
+    return df
+
+
+def get_start_end_years_from_dic(dic):
+    str_y = list(dic.keys())[0]
+    end_y = list(dic.keys())[-1:]
+    return [str_y, end_y]
+def chk_concat(dic, df):
+    """Checks that the sum of lines for all keys of the Dictionary 'dic' equals the number of lines of the DataFrame 'df'"""
+    nb_lines = 0
+    start_year = list(dic.keys())[0]
+    end_year = list(dic.keys())[-1:]
+    for year in dic.keys():
+        nb_lines += dic[year].shape[0]
+
+    print(f"somme des lignes 'dic': {nb_lines}" )
+    print(f"nombre de lignes 'df' : {df.shape[0]}")
+
+# Processing on specific columns ----------------------------------
+def proc_usagers_secu(dic_usagers):
+    """
+    Concat all df usagers from 2005 to 2018 -> ['secu'] is splitted into ['secu1', 'secu2', 'secu3']
+    for year in range(start_year, end_year + 1):
+    """
+    [start_year, end_year] = get_start_end_years_from_dic(dic_usagers)
+    for year in dic_usagers.keys():
+        df = dic_usagers[year]
+        if 2005 <= year <= 2018:
+            # create columns ['secu1', 'secu2', 'secu3'] and drop old 'secu'
+            df['secu'] = df['secu'].replace(to_replace=np.nan, value=-1)
+            df['secu1'] = df['secu'] // 10
+            df['secu2'] = df['secu'] % 10
+            df['secu3'] = np.ones(len(df['secu'])) * (-1)
+
+            df = df.drop(columns=['secu'])
+            df['secu1'] = df['secu1'].astype('int')
+            df['secu2'] = df['secu2'].astype('int')
+            df['secu3'] = df['secu3'].astype('int')
+
+        return df
+def proc_caract_gps(dic_caract):
+    [start_year, end_year] = get_start_end_years_from_dic(dic_caract)
+    for year in dic_caract.keys():
+        df = dic_caract[year]
+        if 'gps' in df.columns:
+            df = df.drop(columns=['gps'], axis=1)
+    return df
+
+# Merge DataFrames ------------------------------------------------
+def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
+    df = df_usagers
+    df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
+    df = df.merge(on='Num_Acc', right=df_lieux, how='left')
+    df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
+
+    return df
