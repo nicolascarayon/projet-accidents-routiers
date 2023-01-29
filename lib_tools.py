@@ -385,6 +385,7 @@ def preproc_vehic(dic_vehic, chk):
     #                                  'choc', 'manv', 'motor', 'occutc'])
     df_vehic = concat_df_from_dict(dic_vehic, chk)
     df_vehic = manage_duplicated(df_vehic, chk)
+    df_vehic = manage_vehic_duplicated(df_vehic, chk)
 
     return df_vehic
 def preproc_lieux(dic_lieux, chk):
@@ -411,7 +412,18 @@ def manage_duplicated(df, chk):
 
     return df
 
+def manage_vehic_duplicated(df_vehic, chk):
+    if chk :
+        df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
+        print(f"Véhicules en doublons vis à vis de la clé fonctionnelle avant traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
 
+    df_vehic.drop_duplicates(['Num_Acc', 'num_veh'], keep='first', inplace=True)
+
+    if chk :
+        df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
+        print(f"Véhicules en doublons vis à vis de la clé fonctionnelle après traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
+
+    return df_vehic
 def get_start_end_years_from_dic(dic):
     str_y = list(dic.keys())[0]
     end_y = list(dic.keys())[-1:]
