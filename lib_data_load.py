@@ -1,53 +1,6 @@
 import pandas as pd
 
 DIR_DATA = ".\\data\\data_gouv_fr\\"
-# def load_vehic_immat(start_year, end_year):
-#     """Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
-#
-#     ex : vehic = load_vehicles(2019, 2021)
-#     les données de l'années 2020 sont accessibles vehic[2020]
-#
-#     Id_accident : Numéro d'identifiant de l’accident
-#     Lettre Conventionnelle Véhicule : Identifiant de chaque véhicule impliqué dans un même accident – Code alpha
-#     Année : Année de l'accident
-#     Lieu Admin Actuel - Territoire Nom : 'Métropole', 'DOM', ou 'Autres OM'
-#     Type Accident - Libellé (old) : accident léger, mortel, ou grave
-#     CNIT : numéro d’identification national associé à chaque type, variante et version (TVV) de chaque réception communautaire de véhicules
-#     Catégorie véhicule : Cyclo, Moto légère, moto lourdez, VT, VU, PL, Autres
-#     Age véhicule : Age du véhicule à partir de la date de 1ère mise en circulation jusqu’à la date de l’accident
-#
-#     """
-#     vehic = {}
-#     for year in range(start_year, end_year + 1):
-#         if year == 2009:
-#             vehic[2009] = pd.read_csv(folder_path + '2009.csv', sep=';')
-#         if year == 2010:
-#             vehic[2010] = pd.read_csv(folder_path + '2010.csv', sep=';')
-#         if year == 2011:
-#             vehic[2011] = pd.read_csv(folder_path + '2011.csv', sep=';')
-#         if year == 2012:
-#             vehic[2012] = pd.read_csv(folder_path + '2012.csv', sep=';')
-#         if year == 2013:
-#             vehic[2013] = pd.read_csv(folder_path + '2013.csv', sep=';')
-#         if year == 2014:
-#             vehic[2014] = pd.read_csv(folder_path + '2014.csv', sep=';')
-#         if year == 2015:
-#             vehic[2015] = pd.read_csv(folder_path + '2015.csv', sep=';')
-#         if year == 2016:
-#             vehic[2016] = pd.read_csv(folder_path + '2016.csv', sep=';')
-#         if year == 2017:
-#             vehic[2017] = pd.read_csv(folder_path + 'usagers-2017.csv', sep=';')
-#         if year == 2018:
-#             vehic[2018] = pd.read_csv(folder_path + 'usagers-2018.csv', sep=';')
-#         if year == 2019:
-#             vehic[2019] = pd.read_csv(folder_path + 'usagers-2019.csv', sep=';')
-#         if year == 2020:
-#             vehic[2020] = pd.read_csv(folder_path + 'usagers-2020.csv', sep=';')
-#         if year == 2021:
-#             vehic[2021] = pd.read_csv(folder_path + 'usagers-2021.csv', sep=';')
-#
-#     return vehic
-
 def load_caract(start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
@@ -196,3 +149,5 @@ def load_data_kagg():
                   'vehic'    : pd.read_csv(DIR_DATA + 'vehicles.csv', sep=',')
                 }
     return data_dict
+
+
