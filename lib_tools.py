@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import datetime
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
@@ -127,7 +128,7 @@ def load_vehicules(start_year, end_year):
     occutc : nombre d’occupants dans le transport en commun
     """
     vehic = {}
-    dic_types = {'obs':'Int64', 'obsm':'Int64', 'choc':'Int64', 'manv':'Int64'}
+    dic_types = {'obs':'Int64', 'obsm':'Int64', 'choc':'Int64', 'manv':'Int64', 'catv':'Int64', 'senc':'Int64'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         sep=',' if 2005 <= year <= 2018 else ';'
@@ -471,6 +472,19 @@ def proc_caract_gps(dic_caract):
 
 def create_col_age(df):
     df['age'] = df['an'] - df['an_nais']
+    return df
+
+def create_col_date(df):
+    dic = {'an': 'year', 'mois': 'month', 'jour': 'day'}
+    df = df.rename(dic, axis=1)
+    df["date"] = pd.to_datetime(df[['year', 'month', 'day']], errors='coerce')
+    df = df.drop(columns=['year', 'month', 'day'], axis=1)
+    return df
+
+def create_col_joursem(df):
+    df['joursem'] = df["date"].dt.dayofweek
+    df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
+                                          ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi','dimanche'])
     return df
 
 # Merge DataFrames ------------------------------------------------
