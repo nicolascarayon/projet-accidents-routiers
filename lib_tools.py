@@ -31,7 +31,7 @@ def load_caract(start_year, end_year):
 
     """
     caract = {}
-    dic_types = {'com':'str', 'atm':'str', 'col':'str'}
+    dic_types = {'com':'str', 'atm':'str', 'col':'str', 'dep':'str'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         if year==2009 :
@@ -71,7 +71,7 @@ def load_lieux(start_year, end_year):
 
     """
     lieux = {}
-    dic_type = {'catr':'str', 'voie':'str', 'v1':'str','v2':'str', 'circ':'str', 'nbv':'str', 'vosp':'str', 'prof':'str', 'plan':'str',
+    dic_type = {'catr':'str', 'voie':'str', 'v1':'str','v2':'str', 'circ':'str', 'nbv':'Int64', 'vosp':'str', 'prof':'str', 'plan':'str',
                 'lartpc':'str', 'surf':'str', 'infra':'str', 'situ':'str'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
@@ -356,7 +356,6 @@ def get_labels(varname, value):
             return 'Accompagné'
         if value == '3':
             return 'En groupe'
-
 # DATA PRE-PROCESSING --------------------------------------------
 def get_cl_age(age):
     if age <= 25:
@@ -405,14 +404,38 @@ def concat_df_from_dict(dic, chk):
     if chk:
         chk_concat(dic, df_final)
     return df_final
-
 def manage_duplicated(df, chk):
     if chk : print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
     df = df.drop_duplicates()
     if chk : print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
 
     return df
+def manage_not_specified(df):
+    df = df.replace(to_replace=[-1, '-1', ' -1'], value=np.nan)
+    return df
+def replace_null_mode(df, chk):
+    cols = df.columns[df.isnull().any()]
+    k = 0
+    for col in cols:
+        mode = df[col].mode()[0]
+        df = df.fillna(mode)
+        # df_all = df_all.fillna(df_all[col].value_counts().index[0])  # faster than mode()[0]
+        k += 1
+        if chk : print(f"{col}\t-> ok (nan replaced with {mode}) \t- {len(cols)-k} columns remaining...")
 
+    return df
+def rmv_col_too_much_null(df, threshold, chk):
+    rate_missing = df.isnull().sum() / len(df)
+    df_miss = pd.DataFrame({'column_name': df.columns, 'rate_missing': rate_missing})
+    df_miss.sort_values('rate_missing', inplace=True, ascending=False)
+    to_drop = df_miss[df_miss.rate_missing >= threshold]['column_name']
+    df = df.drop(columns=to_drop.index, axis=1)
+
+    if chk:
+        df_miss.rate_missing *= 100
+        print(f"Colonnes supprimées : {to_drop.index}")
+        print(f"\n{df_miss}")
+    return df
 def manage_vehic_duplicated(df_vehic, chk):
     if chk :
         df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
@@ -439,7 +462,13 @@ def chk_concat(dic, df):
 
     print(f"somme des lignes 'dic': {nb_lines}" )
     print(f"nombre de lignes 'df' : {df.shape[0]}")
+def rmv_outliers(column, df):
+    if column == "an_nais":
+        df = df.drop(df[(df.an_nais == 1)].index)
+    if column == "age":
+        df = df.drop(df[(df.age > 120)].index)
 
+    return df
 # Processing on specific columns ----------------------------------
 def proc_usagers_secu(dic_usagers):
     """
@@ -469,22 +498,28 @@ def proc_caract_gps(dic_caract):
         if 'gps' in df.columns:
             df = df.drop(columns=['gps'], axis=1)
     return df
-
 def create_col_age(df):
     df['age'] = df['an'] - df['an_nais']
     return df
-
 def create_col_date(df):
     dic = {'an': 'year', 'mois': 'month', 'jour': 'day'}
     df = df.rename(dic, axis=1)
     df["date"] = pd.to_datetime(df[['year', 'month', 'day']], errors='coerce')
     df = df.drop(columns=['year', 'month', 'day'], axis=1)
     return df
-
 def create_col_joursem(df):
     df['joursem'] = df["date"].dt.dayofweek
     df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
                                           ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi','dimanche'])
+    return df
+
+def clean_col_dep(df, chk):
+    if chk : print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+
+    df['dep'] = [clean_dep_code(dep) for dep in df.dep]
+
+    if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+
     return df
 
 # Merge DataFrames ------------------------------------------------
@@ -495,3 +530,63 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
 
     return df
+def get_work_df(start_year, end_year, sampled, chk):
+    # load data into dictionnaries
+    dic_usagers = load_usagers(start_year, end_year)
+    dic_caract  = load_caract(start_year, end_year)
+    dic_vehic   = load_vehicules(start_year, end_year)
+    dic_lieux   = load_lieux(start_year, end_year)
+
+    # Preprocessings pour la construction de : df_usagers, df_caract, df_vehic, df_lieux
+    df_usagers = preproc_usagers(dic_usagers, chk)
+    df_caract  = preproc_caract(dic_caract, chk)
+    df_vehic   = preproc_vehic(dic_vehic, chk)
+    df_lieux   = preproc_lieux(dic_lieux, chk)
+
+    # Merge dans un seul DataFrame
+    df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
+
+    if sampled: df = df.sample(20000)
+
+    return df
+
+# Misc ------------------------------------------------------------
+def dep_codes_get():
+    """
+    source : https://fr.wikipedia.org/wiki/Num%C3%A9rotation_des_d%C3%A9partements_fran%C3%A7ais
+    """
+    dep_lst = []
+    for k in range(1, 96):
+        s = str(k)
+        if len(s) == 1: s = "0" + s
+        dep_lst.append(s)
+
+    for k in range(971, 979):
+        dep_lst.append(str(k))
+
+    dep_lst.append('984')  # Terres Australes et Antarctiques Françaises
+    dep_lst.append('986')  # Wallis et Fotuna
+    dep_lst.append('987')  # Polynésie Française
+    dep_lst.append('988')  # Nouvelle-Calédonie
+    dep_lst.append('989')  # Ile de Clipperton
+
+    dep_lst.append('2A')  # Corse-du-Sud
+    dep_lst.append('2B')  # Haute-Corse
+    dep_lst.append('69D')  # Rhône
+    dep_lst.append('69M')  # Métropole de Lyon
+
+    dep_lst.remove('20')
+
+    return dep_lst
+def clean_dep_code(dep):
+    dep_clean = dep
+    if len(dep) == 1:
+        dep_clean = "0" + dep
+
+    if len(dep) == 3 and dep[-1] == "0":
+        dep_clean = dep[0:2]
+
+    if dep == '201': dep_clean = '20A'
+    if dep == '202': dep_clean = '20B'
+
+    return dep_clean
