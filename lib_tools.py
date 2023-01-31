@@ -31,7 +31,9 @@ def load_caract(start_year, end_year):
 
     """
     caract = {}
-    dic_types = {'com':'str', 'atm':'str', 'col':'str', 'dep':'str'}
+    dic_types = {'Num_Acc' :'Int64', 'jour':'Int64', 'mois':'Int64', 'an':'Int64', 'hrmn':'str',
+                 'lum':'Int64', 'dep':'str', 'com':'str', 'agg':'Int64', 'int':'Int64', 'atm':'Int64',
+                 'col':'Int64', 'adr':'str', 'lat':'str', 'long':'str' }
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         if year==2009 :
@@ -71,8 +73,8 @@ def load_lieux(start_year, end_year):
 
     """
     lieux = {}
-    dic_type = {'catr':'str', 'voie':'str', 'v1':'str','v2':'str', 'circ':'str', 'nbv':'Int64', 'vosp':'str', 'prof':'str', 'plan':'str',
-                'lartpc':'str', 'surf':'str', 'infra':'str', 'situ':'str'}
+    dic_type = {'catr':'Int64', 'voie':'str', 'v1':'str','v2':'str', 'circ':'Int64', 'nbv':'Int64', 'vosp':'Int64', 'prof':'Int64', 'plan':'Int64',
+                'lartpc':'str', 'surf':'Int64', 'infra':'Int64', 'situ':'Int64'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         sep=',' if 2005 <= year <= 2018 else ';'
@@ -102,7 +104,8 @@ def load_usagers(start_year, end_year):
     etatp : etatp
     """
     usagers = {}
-    dic_types = {'place':'str', 'trajet':'str', 'secu':'Int64', 'locp':'str', 'actp':'str', 'etatp':'str', 'an_nais':'Int64'}
+    dic_types = {'place':'Int64', 'catu':'Int64', 'grav':'Int64', 'sexe':'Int64', 'an_nais':'Int64', 'trajet':'Int64',
+                 'secu':'str', 'secu1':'Int64', 'secu2':'Int64', 'secu3':'Int64', 'locp':'Int64', 'actp':'str', 'etatp':'Int64'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         sep=',' if 2005 <= year <= 2018 else ';'
@@ -128,7 +131,8 @@ def load_vehicules(start_year, end_year):
     occutc : nombre d’occupants dans le transport en commun
     """
     vehic = {}
-    dic_types = {'obs':'Int64', 'obsm':'Int64', 'choc':'Int64', 'manv':'Int64', 'catv':'Int64', 'senc':'Int64'}
+    dic_types = {'senc':'Int64', 'catv':'Int64', 'obs':'Int64', 'obsm':'Int64', 'choc':'Int64', 'manv':'Int64',
+                 'motor':'Int64', 'occutc':'Int64'}
     for year in range(start_year, end_year + 1):
         car='_' if 2005 <= year <= 2016 else '-'
         sep=',' if 2005 <= year <= 2018 else ';'
@@ -381,8 +385,6 @@ def preproc_caract(dic_caract, chk):
 
     return df_caract
 def preproc_vehic(dic_vehic, chk):
-    # df_vehic = pd.DataFrame(columns=['Num_Acc', 'id_vehicule', 'num_veh', 'senc', 'catv', 'obs', 'obsm',
-    #                                  'choc', 'manv', 'motor', 'occutc'])
     df_vehic = concat_df_from_dict(dic_vehic, chk)
     df_vehic = manage_duplicated(df_vehic, chk)
     df_vehic = manage_vehic_duplicated(df_vehic, chk)
@@ -411,7 +413,7 @@ def manage_duplicated(df, chk):
 
     return df
 def manage_not_specified(df):
-    df = df.replace(to_replace=[-1, '-1', ' -1'], value=np.nan)
+    df = df.replace(to_replace=['-1', ' -1'], value='-1')
     return df
 def replace_null_mode(df, chk):
     cols = df.columns[df.isnull().any()]
@@ -527,8 +529,10 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
     df = df.merge(on='Num_Acc', right=df_lieux, how='left')
-    df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
-
+    if 'id_vehicule' in df_vehic.columns:
+        df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
+    else:
+        df = df.merge(on=['Num_Acc', 'num_veh'], right=df_vehic, how='left')
     return df
 def get_work_df(start_year, end_year, sampled, chk):
     # load data into dictionnaries
@@ -548,7 +552,7 @@ def get_work_df(start_year, end_year, sampled, chk):
 
     if sampled: df = df.sample(20000)
 
-    return df
+    return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
 
 # Misc ------------------------------------------------------------
 def dep_codes_get():
