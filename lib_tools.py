@@ -4,8 +4,6 @@ import datetime
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
-
-# DATA LOADING --------------------------------------------------
 def load_caract(start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
@@ -158,8 +156,6 @@ def load_data_kagg():
                   'vehic'    : pd.read_csv(DIR_DATA_KAGG + 'vehicles.csv', sep=',')
                 }
     return data_dict
-
-# REFERENCE VALUES GET -------------------------------------------
 def get_labels(varname, value):
     if varname == 'lum':
         if value == 1:
@@ -415,6 +411,21 @@ def manage_duplicated(df, chk):
 def manage_not_specified(df):
     df = df.replace(to_replace=['-1', ' -1'], value='-1')
     return df
+def clean_categ_not_specified(df):
+    col_minusone = get_col_minusone_allowed()
+    col_to_chk = []
+    for col in col_minusone:
+        if col in df.columns:
+            col_to_chk.append(col)
+    df[col_to_chk] = df[col_to_chk].replace(to_replace=np.nan, value=-1)
+
+    return df
+def get_col_minusone_allowed():
+    return ['place', 'catu', 'grav', 'sexe', 'trajet', 'secu', 'locp', 'actp',
+            'etatp', 'secu1', 'secu2', 'secu3', 'lum', 'agg', 'int', 'atm',
+            'col', 'catr', 'circ', 'nbv', 'vosp', 'prof', 'plan', 'lartpc',
+            'larrout', 'surf', 'infra', 'situ', 'env1', 'vma', 'senc', 'catv',
+            'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
 def replace_null_mode(df, chk):
     cols = df.columns[df.isnull().any()]
     k = 0
@@ -471,7 +482,6 @@ def rmv_outliers(column, df):
         df = df.drop(df[(df.age > 120)].index)
 
     return df
-# Processing on specific columns ----------------------------------
 def proc_usagers_secu(dic_usagers):
     """
     Concat all df usagers from 2005 to 2018 -> ['secu'] is splitted into ['secu1', 'secu2', 'secu3']
@@ -504,17 +514,23 @@ def create_col_age(df):
     df['age'] = df['an'] - df['an_nais']
     return df
 def create_col_date(df):
-    dic = {'an': 'year', 'mois': 'month', 'jour': 'day'}
-    df = df.rename(dic, axis=1)
+    dic1 = {'an': 'year', 'mois': 'month', 'jour': 'day'}
+    dic2 = {'year': 'an', 'month': 'mois', 'day': 'jour'}
+    df = df.rename(dic1, axis=1)
     df["date"] = pd.to_datetime(df[['year', 'month', 'day']], errors='coerce')
-    df = df.drop(columns=['year', 'month', 'day'], axis=1)
+    df = df.rename(dic2, axis=1)
+    # df = df.drop(columns=['year', 'month', 'day'], axis=1)
+    return df
+def create_col_grav_lbl(df):
+    labels = ['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger']
+    df['grav_lbl'] = [labels[grav - 1] for grav in df.grav]
+
     return df
 def create_col_joursem(df):
     df['joursem'] = df["date"].dt.dayofweek
     df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
                                           ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi','dimanche'])
     return df
-
 def clean_col_dep(df, chk):
     if chk : print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
@@ -523,8 +539,6 @@ def clean_col_dep(df, chk):
     if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
-
-# Merge DataFrames ------------------------------------------------
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
@@ -553,8 +567,6 @@ def get_work_df(start_year, end_year, sampled, chk):
     if sampled: df = df.sample(20000)
 
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
-
-# Misc ------------------------------------------------------------
 def dep_codes_get():
     """
     source : https://fr.wikipedia.org/wiki/Num%C3%A9rotation_des_d%C3%A9partements_fran%C3%A7ais
@@ -594,3 +606,21 @@ def clean_dep_code(dep):
     if dep == '202': dep_clean = '20B'
 
     return dep_clean
+
+def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year):
+    dic = {'usagers': dic_usagers, 'caract': dic_caract, 'lieux': dic_lieux, 'vehic': dic_vehic}
+
+    for key in dic.keys():
+        print(f"\n{key} : \n")
+        nb_lin = []
+        nb_col = []
+
+        for year in range(start_year, end_year + 1):
+            dic_data = dic[key]
+            df_tmp = dic_data[year]
+            nb_lin.append(df_tmp.shape[0])
+            nb_col.append(df_tmp.shape[1])
+            print(f'{key} {year} : {df_tmp.shape[1]} colonnes x {df_tmp.shape[0]} lignes')
+
+        print(f"\nnombre de lignes min : {min(nb_lin)}")
+        print(f"nombre de lignes max : {max(nb_lin)}")
