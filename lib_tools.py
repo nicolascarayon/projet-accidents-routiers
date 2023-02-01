@@ -513,13 +513,16 @@ def proc_caract_gps(dic_caract):
 def create_col_age(df):
     df['age'] = df['an'] - df['an_nais']
     return df
-def create_col_date(df):
-    dic1 = {'an': 'year', 'mois': 'month', 'jour': 'day'}
-    dic2 = {'year': 'an', 'month': 'mois', 'day': 'jour'}
+def create_col_datetime(df):
+    df['hr'] = [hrmn[0] + hrmn[1] for hrmn in df.hrmn]
+    df['mn'] = [hrmn[3] + hrmn[4] for hrmn in df.hrmn]
+    dic1 = {'an': 'year', 'mois': 'month', 'jour': 'day', 'hr':'hour', 'mn':'minute'}
+    dic2 = {'year': 'an', 'month': 'mois', 'day': 'jour', 'hour':'hr', 'minute':'mn'}
     df = df.rename(dic1, axis=1)
-    df["date"] = pd.to_datetime(df[['year', 'month', 'day']], errors='coerce')
+    df["datetime"] = pd.to_datetime(df[['year', 'month', 'day', 'hour', 'minute']], errors='coerce')
     df = df.rename(dic2, axis=1)
-    # df = df.drop(columns=['year', 'month', 'day'], axis=1)
+    df = df.drop(columns=['hr', 'mn'], axis=1)
+
     return df
 def create_col_grav_lbl(df):
     labels = ['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger']
@@ -527,9 +530,17 @@ def create_col_grav_lbl(df):
 
     return df
 def create_col_joursem(df):
-    df['joursem'] = df["date"].dt.dayofweek
+    df['joursem'] = df["datetime"].dt.dayofweek
     df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
                                           ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi','dimanche'])
+    return df
+def clean_col_dep(df, chk):
+    if chk : print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+
+    df['dep'] = [clean_dep_code(dep) for dep in df.dep]
+
+    if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+
     return df
 def clean_col_dep(df, chk):
     if chk : print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
@@ -606,7 +617,37 @@ def clean_dep_code(dep):
     if dep == '202': dep_clean = '20B'
 
     return dep_clean
+def clean_dep_code(dep):
+    dep_clean = dep
+    if len(dep) == 1:
+        dep_clean = "0" + dep
 
+    if len(dep) == 3 and dep[-1] == "0":
+        dep_clean = dep[0:2]
+
+    if dep == '201': dep_clean = '20A'
+    if dep == '202': dep_clean = '20B'
+
+    return dep_clean
+def clean_nbv(df):
+    df['nbv'] = [-1 if nbv > 6 else nbv for nbv in df.nbv]
+
+    return df
+def clean_catv(df):
+    df['catv'] = [catv if (catv in [1, 33, 10, 2]) else -1 for catv in df.catv]
+
+    return df
+def clean_hrmn(df):
+    df['hrmn'] = [get_hh_mn(chaine) for chaine in df.hrmn]
+
+
+    return df
+def get_hh_mn(chaine):
+    if len(chaine) == 1: return "00:0" + chaine
+    if len(chaine) == 2: return "00:" + chaine
+    if len(chaine) == 3: return "0" + chaine[0] + ":00"
+    if len(chaine) == 4: return f"{chaine[0]}{chaine[1]}:{chaine[2]}{chaine[3]}"
+    if len(chaine) > 4: return chaine
 def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year):
     dic = {'usagers': dic_usagers, 'caract': dic_caract, 'lieux': dic_lieux, 'vehic': dic_vehic}
 
