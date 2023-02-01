@@ -542,14 +542,6 @@ def clean_col_dep(df, chk):
     if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
-def clean_col_dep(df, chk):
-    if chk : print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
-
-    df['dep'] = [clean_dep_code(dep) for dep in df.dep]
-
-    if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
-
-    return df
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
@@ -609,10 +601,8 @@ def clean_dep_code(dep):
     dep_clean = dep
     if len(dep) == 1:
         dep_clean = "0" + dep
-
     if len(dep) == 3 and dep[-1] == "0":
         dep_clean = dep[0:2]
-
     if dep == '201': dep_clean = '20A'
     if dep == '202': dep_clean = '20B'
 
@@ -634,7 +624,7 @@ def clean_nbv(df):
 
     return df
 def clean_catv(df):
-    df['catv'] = [catv if (catv in [1, 33, 10, 2]) else -1 for catv in df.catv]
+    df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
 
     return df
 def clean_hrmn(df):
