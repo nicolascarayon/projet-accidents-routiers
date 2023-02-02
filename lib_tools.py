@@ -542,6 +542,8 @@ def clean_col_dep(df, chk):
     if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
+
+
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
@@ -625,6 +627,11 @@ def clean_nbv(df):
     return df
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
+
+    return df
+
+def clean_senc(df):
+    df.senc = df.senc.replace(to_replace=[0, 3], value=-1)
 
     return df
 def clean_hrmn(df):
