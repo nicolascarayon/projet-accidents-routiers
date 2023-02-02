@@ -4,6 +4,33 @@ import datetime
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
+def load_proj_df(start_year, end_year, chk, sampled):
+    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, sampled, chk)
+    if chk:
+        display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
+
+        # rmv col related to geographical info
+        df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], chk)
+        # rmv col not known before the accident
+        df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], chk)
+
+        df = rmv_col_too_much_null(df, 0.08, chk)
+        df = clean_categ_not_specified(df)
+        df = drop_lines_with_null(df, chk)
+        df = create_col_age(df)
+        df = clean_col_dep(df, True)
+        df = clean_nbv(df)
+        df = clean_catv(df)
+        df = clean_hrmn(df)
+        df = create_col_datetime(df)
+        df = create_col_joursem(df)
+        df = create_col_grav_lbl(df)
+        df = drop_columns_from_df(df, ['an_nais'], chk)
+
+        if chk:
+            df.info(verbose=True, show_counts=True)
+
+    return df
 def load_caract(start_year, end_year):
     """
     Retourne les données dans un dictionnaire de dataframes dont la clé est l'année au format entier
@@ -542,8 +569,6 @@ def clean_col_dep(df, chk):
     if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
-
-
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
@@ -629,7 +654,6 @@ def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
 
     return df
-
 def clean_senc(df):
     df.senc = df.senc.replace(to_replace=[0, 3], value=-1)
 
@@ -637,6 +661,28 @@ def clean_senc(df):
 def clean_hrmn(df):
     df['hrmn'] = [get_hh_mn(chaine) for chaine in df.hrmn]
 
+
+    return df
+def drop_lines_with_null(df, chk):
+    if chk:
+        print("Suppression des lignes avec Null : ")
+        nb_bef = df.shape[0]
+        print(f"Nombre de lignes avant : {nb_bef}")
+    df = df.dropna(axis=0, how='any')
+    if chk:
+        nb_aft = df.shape[0]
+        print(f"Nombre de lignes après : {nb_aft}")
+        print(f"Taux de perte : {(nb_bef - nb_aft) / nb_aft * 100:.2f} %")
+
+    return df
+def drop_columns_from_df(df, columns, chk):
+    for col in columns:
+        if col in df.columns:
+            df = df.drop(columns=col, axis=1)
+    if chk:
+        for col in columns:
+            if not (col in df.columns):
+                print(f"Column {col} coreectly dropped from DataFrame")
 
     return df
 def get_hh_mn(chaine):
