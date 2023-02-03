@@ -7,5 +7,3 @@
 - Anaconda : https://www.anaconda.com/products/distribution
 - jupyter : https://jupyter.org/install
 - git : https://git-scm.com/downloads
-
-Projet réalisé par : Léonard JOLIMOY, Nicolas CARAYON, Zara WEYL
