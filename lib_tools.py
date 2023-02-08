@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import datetime
+from category_encoders import TargetEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
@@ -816,3 +817,19 @@ def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start
 
         print(f"\nnombre de lignes min : {min(nb_lin)}")
         print(f"nombre de lignes max : {max(nb_lin)}")
+
+
+def encode_dummies_col(df, col, chk):
+    df_encoded = df.join(pd.get_dummies(df[col], prefix=col))
+    df_encoded = df_encoded.drop(columns=[col], axis=1)
+    if chk: print(f"Column {col} has been dummies encoded")
+
+    return df_encoded
+
+def encode_target_col(df, col, target, chk):
+    encoder = TargetEncoder()
+    df[f"{col}_te"] = encoder.fit_transform(df[col].astype('str'), target)
+    df = df.drop(columns=[col], axis=1)
+    if chk: print(f"Column {col} has been target encoded")
+
+    return df
