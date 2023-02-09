@@ -5,7 +5,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
-
+SAMPLE_SIZE = 100000
 
 def load_proj_df(start_year, end_year, chk, sampled):
     df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, sampled, chk)
@@ -35,6 +35,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = drop_columns_from_df(df, ['an'], chk)
         df = drop_columns_from_df(df, ['num_veh'], chk)
         df = drop_columns_from_df(df, ['hrmn'], chk)
+        df = encode_grav(df, chk)
         df = set_target_first_column(df, chk)
 
         if chk:
@@ -473,7 +474,7 @@ def concat_df_from_dict(dic, chk):
 def manage_duplicated(df, chk):
     if chk: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
     df = df.drop_duplicates()
-    if chk: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
+    if chk: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
 
     return df
 
@@ -665,15 +666,19 @@ def get_work_df(start_year, end_year, sampled, chk):
     dic_lieux = load_lieux(start_year, end_year)
 
     # Preprocessings pour la construction de : df_usagers, df_caract, df_vehic, df_lieux
+    if chk: print(f"\nusagers :")
     df_usagers = preproc_usagers(dic_usagers, chk)
+    if chk: print(f"\ncaractéristiques :")
     df_caract = preproc_caract(dic_caract, chk)
+    if chk: print(f"\nvéhicules :")
     df_vehic = preproc_vehic(dic_vehic, chk)
+    if chk: print(f"\nlieux :")
     df_lieux = preproc_lieux(dic_lieux, chk)
 
     # Merge dans un seul DataFrame
     df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
 
-    if sampled: df = df.sample(20000)
+    if sampled: df = df.sample(SAMPLE_SIZE)
 
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
 
@@ -804,7 +809,7 @@ def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start
     dic = {'usagers': dic_usagers, 'caract': dic_caract, 'lieux': dic_lieux, 'vehic': dic_vehic}
 
     for key in dic.keys():
-        print(f"\n{key} : \n")
+        print(f"{key} : \n")
         nb_lin = []
         nb_col = []
 
@@ -828,8 +833,14 @@ def encode_dummies_col(df, col, chk):
 
 def encode_target_col(df, col, target, chk):
     encoder = TargetEncoder()
-    df[f"{col}_te"] = encoder.fit_transform(df[col].astype('str'), target)
-    df = df.drop(columns=[col], axis=1)
+    df[f"{col}"] = encoder.fit_transform(df[col].astype('str'), target)
+    # df = df.drop(columns=[col], axis=1)
     if chk: print(f"Column {col} has been target encoded")
+
+    return df
+
+def encode_grav(df, chk):
+    df['grav'] = df['grav'].replace(to_replace=[[1, 4], [2, 3]], value=[0, 1]).astype('int')
+    if chk : print(f"column grav encoded into 2 classes")
 
     return df
