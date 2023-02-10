@@ -13,6 +13,7 @@ class FeaturesScaler(TransformerMixin):
         return self
 
     def transform(self, X):
-        X_sc = self.sc.transform(X[self.cols_target_encoded])
+        X_sc = X
+        X_sc[self.cols_target_encoded] = self.sc.transform(X[self.cols_target_encoded])
         if self.trace: print(f"Columns {self.cols_target_encoded} have been normalized with Standard Scaler")
         return X_sc

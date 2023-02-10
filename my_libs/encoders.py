@@ -20,10 +20,10 @@ class FeaturesEncoder(BaseEstimator, TransformerMixin):
             if self.trace: print(f"Column {col} has been target encoded")
 
         # hot encoding for other columns
-        for col in X.columns:
+        for col in X_enc.columns:
             if not (col in self.cols_target_encoded):
-                if col in X.columns:
-                    X_enc = X.join(pd.get_dummies(X[col], prefix=col))
+                if col in X_enc.columns:
+                    X_enc = X_enc.join(pd.get_dummies(X_enc[col], prefix=col))
                     X_enc = X_enc.drop(columns=[col], axis=1)
                     if self.trace: print(f"Column {col} has been dummy encoded")
 
