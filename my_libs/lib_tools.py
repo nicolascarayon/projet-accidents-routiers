@@ -23,6 +23,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = create_col_age(df)
         df = clean_col_dep(df, True)
         df = clean_nbv(df)
+        df = clean_actp(df)
         df = clean_catv(df)
         df = clean_hrmn(df)
         df = create_col_datetime(df)
@@ -34,6 +35,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = drop_columns_from_df(df, ['datetime'], chk)
         df = drop_columns_from_df(df, ['an'], chk)
         df = drop_columns_from_df(df, ['num_veh'], chk)
+        df = drop_columns_from_df(df, ['jour'], chk)
         df = drop_columns_from_df(df, ['hrmn'], chk)
         df = encode_grav(df, chk)
         df = set_target_first_column(df, chk)
@@ -743,7 +745,10 @@ def clean_nbv(df):
 
     return df
 
+def clean_actp(df):
+    df.actp = df.actp.replace(to_replace=[' -1'], value=['-1'])
 
+    return df
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
 

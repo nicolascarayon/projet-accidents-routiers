@@ -1,0 +1,4 @@
+category-encoders==2.6.0
+imbalanced-learn==0.10.1
+imblearn==0.0
+streamlit==1.17.0
