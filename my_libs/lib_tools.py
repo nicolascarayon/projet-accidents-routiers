@@ -3,8 +3,8 @@ import numpy as np
 from category_encoders import TargetEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-DIR_DATA_GOUV = "../data/data_gouv_fr\\"
-DIR_DATA_KAGG = "../data/kaggle\\"
+DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
+DIR_DATA_KAGG = ".\\data\\kaggle\\"
 SAMPLE_SIZE = 100000
 
 def load_proj_df(start_year, end_year, chk, sampled):
