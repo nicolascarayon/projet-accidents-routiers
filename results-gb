@@ -1,0 +1,54 @@
+Gradient Boosting - SMOTE
+
+params = {
+    'n_estimators' : [100],
+    'criterion' : ('friedman_mse', 'squared_error'),
+}
+
+Best score  :  0.8020950087565666
+Best params :  {'criterion': 'friedman_mse', 'n_estimators': 100}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.84      0.89      0.84      0.87      0.86      0.75     15490
+          1       0.89      0.84      0.89      0.86      0.86      0.74     15490
+
+avg / total       0.87      0.86      0.86      0.86      0.86      0.75     30980
+
+---------------------------------------------------------------------------------------
+Gradient Boosting - RandomUnderSampler
+
+params = {
+    'n_estimators' : [100],
+    'criterion' : ('friedman_mse', 'squared_error'),
+}
+
+Best score  :  0.7423486527765922
+Best params :  {'criterion': 'squared_error', 'n_estimators': 100}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.76      0.71      0.77      0.73      0.74      0.55      4469
+          1       0.73      0.77      0.71      0.75      0.74      0.55      4469
+
+avg / total       0.74      0.74      0.74      0.74      0.74      0.55      8938
+
+--- performed in 145.93663597106934 seconds ---
+
+---------------------------------------------------------------------------------------
+Gradient Boosting - RandomOverSampler
+
+params = {
+    'n_estimators' : [100],
+    'criterion' : ('friedman_mse', 'squared_error'),
+}
+
+Best score  :  0.742459407710245
+Best params :  {'criterion': 'friedman_mse', 'n_estimators': 100}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.76      0.71      0.77      0.73      0.74      0.55     15490
+          1       0.73      0.77      0.71      0.75      0.74      0.55     15490
+
+avg / total       0.74      0.74      0.74      0.74      0.74      0.55     30980
+
+--- performed in 607.6215658187866 seconds ---
+---------------------------------------------------------------------------------------

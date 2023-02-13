@@ -39,17 +39,17 @@ avg / total       0.74      0.74      0.74      0.74      0.74      0.55      89
 Random Forest - RandomOverSampler
 
 params = {
-    'n_estimators' : [10, 20, 50],
+    'n_estimators' : [10, 20, 50, 70],
     'criterion' : ('gini', 'entropy', 'log_loss'),
 }
 
-Best score  :  0.9213474486401827
+Best score  :  0.9222808863774564
 Best params :  {'criterion': 'gini', 'n_estimators': 50}
                    pre       rec       spe        f1       geo       iba       sup
 
-          0       0.62      0.91      0.45      0.74      0.64      0.42     15490
-          1       0.83      0.45      0.91      0.58      0.64      0.39     15490
+          0       0.62      0.91      0.44      0.74      0.63      0.42     15490
+          1       0.83      0.44      0.91      0.58      0.63      0.38     15490
 
-avg / total       0.72      0.68      0.68      0.66      0.64      0.40     30980
+avg / total       0.73      0.68      0.68      0.66      0.63      0.40     30980
 
---- performed in 95.63439989089966 seconds ---
+--- performed in 169.10041737556458 seconds ---
