@@ -1,0 +1,55 @@
+Random Forest - SMOTE
+
+params = {
+    'n_estimators' : [20, 50],
+    'criterion' : ('gini', 'entropy', 'log_loss'),
+}
+
+Best score  :  0.837054425202085
+Best params :  {'criterion': 'gini', 'n_estimators': 50}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.82      0.94      0.80      0.88      0.87      0.76     15490
+          1       0.93      0.80      0.94      0.86      0.87      0.74     15490
+
+avg / total       0.88      0.87      0.87      0.87      0.87      0.75     30980
+
+--- performed in 107.75076651573181 seconds ---
+
+-----------------------------------------------------------------------------------------------
+Random Forest - RandomUnderSampler
+
+params = {
+    'n_estimators' : [10, 20, 50],
+    'criterion' : ('gini', 'entropy', 'log_loss'),
+}
+
+Best score  :  0.7336551302933709
+Best params :  {'criterion': 'entropy', 'n_estimators': 50}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.75      0.73      0.75      0.74      0.74      0.55      4469
+          1       0.73      0.75      0.73      0.74      0.74      0.55      4469
+
+avg / total       0.74      0.74      0.74      0.74      0.74      0.55      8938
+
+--- performed in 39.87006115913391 seconds ---
+
+-----------------------------------------------------------------------------------------------
+Random Forest - RandomOverSampler
+
+params = {
+    'n_estimators' : [10, 20, 50],
+    'criterion' : ('gini', 'entropy', 'log_loss'),
+}
+
+Best score  :  0.9213474486401827
+Best params :  {'criterion': 'gini', 'n_estimators': 50}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.62      0.91      0.45      0.74      0.64      0.42     15490
+          1       0.83      0.45      0.91      0.58      0.64      0.39     15490
+
+avg / total       0.72      0.68      0.68      0.66      0.64      0.40     30980
+
+--- performed in 95.63439989089966 seconds ---
