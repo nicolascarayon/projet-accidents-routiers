@@ -44,13 +44,24 @@ params = {
     'max_features' : ('auto', 'sqrt', 'log2'),
     'min_samples_split' : (2,4,6)
 }
-Best score  :  0.8797159392500808
-Best params :  {'criterion': 'gini', 'max_depth': 50, 'max_features': 'auto', 'min_samples_split': 2}
+
+Best score  :  0.7928331021768136
+Best params :  {'criterion': 'entropy', 'max_depth': 50, 'max_features': 'sqrt', 'min_samples_split': 6}
                    pre       rec       spe        f1       geo       iba       sup
 
-          0       0.58      0.82      0.41      0.68      0.58      0.35     15490
-          1       0.70      0.41      0.82      0.52      0.58      0.32     15490
+          0       0.77      0.84      0.75      0.80      0.79      0.63     15476
+          1       0.83      0.75      0.84      0.78      0.79      0.62     15476
 
-avg / total       0.64      0.62      0.62      0.60      0.58      0.34     30980
+avg / total       0.80      0.79      0.79      0.79      0.79      0.63     30952
 
---- performed in 91.48858714103699 seconds ---
+--- performed in 240.8479197025299 seconds ---
+--------------------------------------------------------------------------------------------------------------------
+
+Best score  :  0.7928331021768136
+Best params :  {'criterion': 'entropy', 'max_depth': 50, 'max_features': 'sqrt', 'min_samples_split': 6}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.77      0.84      0.75      0.80      0.79      0.63     15476
+          1       0.83      0.75      0.84      0.78      0.79      0.62     15476
+
+avg / total       0.80      0.79      0.79      0.79      0.79      0.63     30952
