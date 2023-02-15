@@ -11,7 +11,7 @@
 - Passer à la 3° phase avec CatBoost (excellent candidat pour le travail sur données catégorielles)
 - Essayer de comprendre pourquoi le modéle se trompe par analyse des erreurs (picking + détection de patterns)
 - Procéder à l'interprétation du modèle simple et du modèle boosté
-- Régdiger le rapport de modélisation
+- Rédiger le rapport de modélisation
 
 ------------------------------------------------------------------------------------------------------------------------
 08/01/2023-18h00:
