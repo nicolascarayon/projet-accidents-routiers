@@ -7,6 +7,11 @@ DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
 SAMPLE_SIZE = 100000
 
+def generate_pickle(start_year, end_year, chk, sampled, filename):
+    df = load_proj_df(start_year, end_year, chk, sampled)
+    df.to_pickle(f"./{filename}")
+
+
 def load_proj_df(start_year, end_year, chk, sampled):
     df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, sampled, chk)
     if chk:
@@ -21,6 +26,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = clean_categ_not_specified(df)
         df = drop_lines_with_null(df, chk)
         df = create_col_age(df)
+        df = create_col_age_cls(df)
         df = clean_col_dep(df, True)
         df = clean_nbv(df)
         df = clean_actp(df)
@@ -30,6 +36,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = create_col_joursem(df)
         df = create_col_grav_lbl(df)
         df = drop_columns_from_df(df, ['an_nais'], chk)
+        df = drop_columns_from_df(df, ['age'], chk)
         df = drop_columns_from_df(df, ['grav_lbl'], chk)    # drop column used only for data pre-analysis
         df = drop_columns_from_df(df, ['Num_Acc'], chk)
         df = drop_columns_from_df(df, ['datetime'], chk)
@@ -606,9 +613,15 @@ def proc_caract_gps(dic_caract):
             df = df.drop(columns=['gps'], axis=1)
     return df
 
-
 def create_col_age(df):
     df['age'] = df['an'] - df['an_nais']
+
+    return df
+def create_col_age_cls(df):
+    # partially inspired from https://www.cerema.fr/system/files/documents/2017/11/rapport_classes_age_version_web_14032017_cle73f1e2.pdf
+    # (Accidentalité et classes d'âge - Analyse des données 2011-2013 du fichier BAAC - Rapport de mars 2017
+    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()])
+
     return df
 
 
