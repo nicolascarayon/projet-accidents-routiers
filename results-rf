@@ -1,3 +1,35 @@
+2023-02-16-10-37
+RandomForestClassifier - GridSearchCV -------------------------------------------------------
+
+    params = {'n_estimators' : [10, 20, 30, 40 ,50],
+              'criterion' : ('gini', 'entropy'),
+              'max_depth' : [10, 20],
+              'min_samples_split' : (2,4)}
+
+    Best score  :  0.7757373981737663
+    Best params :  {'criterion': 'entropy', 'max_depth': 10, 'min_samples_split': 4, 'n_estimators': 30}
+                       pre       rec       spe        f1       geo       iba       sup
+
+              0       0.83      0.88      0.82      0.85      0.85      0.72     15432
+              1       0.87      0.82      0.88      0.85      0.85      0.72     15432
+
+    avg / total       0.85      0.85      0.85      0.85      0.85      0.72     30864
+
+    --- performed in 769.3611936569214 seconds ---
+
+RandomForestClassifier - Optuna -------------------------------------------------------
+    dt_n_estimators      = trial.suggest_int('n_estimators', 20, 50)
+    dt_criterion         = trial.suggest_categorical('criterion', ['gini', 'entropy'])
+    dt_max_depth         = trial.suggest_int('max_depth', 10, 50, log=False)
+    dt_min_samples_split = trial.suggest_int('min_samples_split', 2, 6)
+
+{'classifier': 'RandomForestClassifier', 'n_estimators': 26, 'criterion': 'entropy', 'max_depth': 27,
+'min_samples_split': 3}. Best is trial 13 with value: 0.7745954218946248.
+
+>> GridSearchCV et Optuna très proches concernant le choix des valeurs des hyperparamètres
+
+-----------------------------------------------------------------------------------------------
+
 Random Forest - SMOTE
 
 params = {
