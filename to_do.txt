@@ -1,14 +1,37 @@
+21/02/2023 - 18h15 :
 
-- regarder les correlations entre variables (hors target) des tables
-    - usagers
-	- caracteristiques
-    - lieux
-	- vehicules
-	mais je ne m'attends pas a de corrélation forte, je suppose que l'administration fait bien son job et a pensé les variables pour qu'elles soient bien décorrélées
-	
-- regarder les relations gravité/variables des fichiers vehicules + lieux
-		usagers-caractéristiques -> clé : Num_acc
-		usagers-lieux            -> clé : Num_acc
-		usagers-vehicules        -> clé : ['Num_acc', 'num_veh']
-		usagers-vehic-immat      -> clé : ['Num_acc', 'num_veh'] -> id_vehicule?
-	
+------------------------------------------------------------------------------------------------------------------------
+15/02/2023 - 13h00
+
+- Les perfs du modèle Random Forest sont étonnamment élevées
+    -> checker si les variables transformées par Target Encoding ne sont pas responsable d'un biais (data leakage)
+       - Création de classes d'âge
+       - One Hot encoding pour les départements
+- Essayer la lib Optuna en remplacement de GridSearchCV() pour optimiser les modèles
+- Passer à la 3° phase avec CatBoost (excellent candidat pour le travail sur données catégorielles)
+- Essayer de comprendre pourquoi le modéle se trompe par analyse des erreurs (picking + détection de patterns)
+- Procéder à l'interprétation du modèle simple et du modèle boosté
+- Rédiger le rapport de modélisation
+
+------------------------------------------------------------------------------------------------------------------------
+08/01/2023-18h00:
+
+- Stocker les données dans des fichiers .pkl au lieu de .csv (éviter les différences d'encodage d'une machine à l'autre)
+
+- modelisation :
+  - essayer plusieurs types de modeles
+  - pour chaque modèle essayer différentes stratégies de resampling (under, over, smote)
+
+ - Investiguer Optuna pour l'optimisation du modéle
+ - Définir les métriques à employer et conclure pour chaque modèle
+
+ -> Iteration supplémentaire
+    une fois un modele simple mais optimisé obtenu, bagging boosting ou deep learning (préférence pour bagging/boosting
+    sur des données tabulaires)
+
+ -> Faire de l'explicabilité
+    avec par exemple shapash (lib créée par les data scientists de la MAIF) pour ajouter une surcouche visuelle
+
+ - rappel Streamlit :
+    - soit créer un support type ppt (déroulé du projet) puis streamlit pour faire tourner le modele en direct live
+    - soit tout faire sur streamlit
