@@ -13,7 +13,7 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.encoder_target = TargetEncoder(cols=cols_target_encoded)
         self.encoder_onehot = OneHotEncoder(cols=cols_onehot_encoded)
         self.scaler = StandardScaler()
-        self.sampler = SMOTE(random_state=42)
+        self.sampler = SMOTE()
         # sampler        = RandomUnderSampler()
         # sampler        = RandomOverSampler()
 
@@ -32,4 +32,5 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
             X_sc  = self.scaler.transform(X_oh)
             X_rs, y_rs = self.sampler.fit_resample(X_sc, y)
 
+        # return pd.DataFrame(data=X_sc, columns=X_oh.columns), y
         return pd.DataFrame(data=X_rs, columns=X_oh.columns), y_rs

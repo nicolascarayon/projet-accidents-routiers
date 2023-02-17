@@ -40,7 +40,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = drop_columns_from_df(df, ['grav_lbl'], chk)    # drop column used only for data pre-analysis
         df = drop_columns_from_df(df, ['Num_Acc'], chk)
         df = drop_columns_from_df(df, ['datetime'], chk)
-        df = drop_columns_from_df(df, ['an'], chk)
+        # df = drop_columns_from_df(df, ['an'], chk)
         df = drop_columns_from_df(df, ['num_veh'], chk)
         df = drop_columns_from_df(df, ['jour'], chk)
         df = drop_columns_from_df(df, ['hrmn'], chk)
