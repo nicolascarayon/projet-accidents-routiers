@@ -620,7 +620,7 @@ def create_col_age(df):
 def create_col_age_cls(df):
     # partially inspired from https://www.cerema.fr/system/files/documents/2017/11/rapport_classes_age_version_web_14032017_cle73f1e2.pdf
     # (Accidentalité et classes d'âge - Analyse des données 2011-2013 du fichier BAAC - Rapport de mars 2017
-    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()])
+    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()], labels=[0, 1, 2, 3, 4])
 
     return df
 
