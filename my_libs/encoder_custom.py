@@ -14,7 +14,7 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.encoder_onehot = OneHotEncoder(cols=cols_onehot_encoded)
         self.scaler = StandardScaler()
         # self.sampler = SMOTENC()
-        self.sampler        = RandomUnderSampler()
+        # self.sampler        = RandomUnderSampler()
         # self.sampler        = RandomOverSampler()
 
     def fit(self, X, y):
@@ -22,13 +22,13 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y, datatype='Train'):
 
-        # self.sampler = SMOTEN()
+        self.sampler = SMOTEN()
 
         if datatype == 'Train':
+            X, y = self.sampler.fit_resample(X, y)
             X = self.encoder_target.fit_transform(X, y)
             X = self.encoder_onehot.fit_transform(X, y)
             X = self.scaler.fit_transform(X)
-            X, y = self.sampler.fit_resample(X, y)
 
         if datatype == 'Test':
             X  = self.encoder_target.transform(X)
