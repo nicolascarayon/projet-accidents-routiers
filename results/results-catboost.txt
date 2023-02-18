@@ -1,0 +1,21 @@
+20230218-1751 :
+
+model = CatBoostClassifier()
+params = {
+    'iterations' : [100, 200],
+    'learning_rate' : [0.1, 0.5]
+}
+
+Best score  :  0.49028060490235364
+Best params :  {'iterations': 200, 'learning_rate': 0.5}
+                   pre       rec       spe        f1       geo       iba       sup
+
+          0       0.84      0.94      0.40      0.88      0.62      0.40     15309
+          1       0.66      0.40      0.94      0.50      0.62      0.36      4651
+
+avg / total       0.80      0.81      0.53      0.79      0.62      0.39     19960
+
+model  : <catboost.core.CatBoostClassifier object at 0x000001D8915B7E20>
+params : {'iterations': [100, 200], 'learning_rate': [0.1, 0.5]}
+--- Optimization with GridSearchCV performed in 649.6078531742096 seconds ---
+
