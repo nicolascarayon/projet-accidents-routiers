@@ -862,3 +862,13 @@ def encode_grav(df, chk):
     if chk : print(f"column grav encoded into 2 classes")
 
     return df
+
+def train_test_split_along_time(data, target, year):
+    filter_train = data.an < year
+    filter_test = data.an >= year
+    X_train = data[filter_train]
+    y_train = target[filter_train]
+    X_test = data[filter_test]
+    y_test = target[filter_test]
+
+    return X_train, y_train, X_test, y_test
