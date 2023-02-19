@@ -2,6 +2,7 @@ import time
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
+from catboost import CatBoostClassifier
 from imblearn.metrics import classification_report_imbalanced
 from sklearn.metrics import classification_report
 
@@ -34,6 +35,8 @@ class ModelEvaluator:
         if self.model_type == 'GradientBoostingClassifier':
             model = GradientBoostingClassifier(learning_rate=self.params['learning_rate'],
                                            n_estimators=self.params['n_estimators'])
+
+        if self.model_type == 'CatBoostClassifier': model = CatBoostClassifier(**self.params)
 
         model.fit(self.X_train, self.y_train)
 
