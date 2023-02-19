@@ -15,8 +15,8 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.encoder_target = TargetEncoder(cols=cols_target_encoded)
         self.encoder_onehot = OneHotEncoder(cols=cols_onehot_encoded)
         self.scaler = StandardScaler()
-        self.sampler = SMOTE()
-        # self.sampler = SMOTENC()
+        # self.sampler = SMOTE()
+        self.sampler = SMOTEN()
         # self.sampler        = RandomUnderSampler()
         # self.sampler        = RandomOverSampler()
 
@@ -28,6 +28,11 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         start_time = time.time()
 
         if datatype == 'Train':
+            X, y = self.sampler.fit_resample(X, y)
+            print("Classes cardinality after resampling :")
+            print(y.value_counts())
+            print(f"X shape : {X.shape}")
+
             if len(self.cols_target_encoded)>0:
                 print(f"Columns target encoded : {self.cols_target_encoded}")
                 X = self.encoder_target.fit_transform(X, y)
@@ -38,10 +43,7 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
             X = self.scaler.fit_transform(X)
             print(f"Features normalized")
 
-            X, y = self.sampler.fit_resample(X, y)
-            print("Classes cardinality after resampling :")
-            print(y.value_counts())
-            print(f"X shape : {X.shape}")
+
 
         if datatype == 'Test':
             X  = self.encoder_target.transform(X)

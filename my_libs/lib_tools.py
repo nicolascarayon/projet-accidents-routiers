@@ -851,3 +851,22 @@ def train_test_split_along_time(data, target, year):
     y_test = target[filter_test]
 
     return X_train, y_train, X_test, y_test
+
+def get_train_valid_test_data(filename_train, filename_test, columns):
+
+    df_train = pd.read_pickle(f'./{filename_train}')
+    df_test  = pd.read_pickle(f'./{filename_test}')
+
+    data_train = df_train.iloc[:, 1:]
+    target_train = df_train['grav']
+    data_train = data_train[columns]
+
+    data_test = df_test.iloc[:, 1:]
+    target_test = df_test['grav']
+    data_test = data_test[columns]
+
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
+    X_test_final, y_test_final = data_test, target_test
+
+    return X_train, y_train, X_test, y_test, X_test_final, y_test_final
