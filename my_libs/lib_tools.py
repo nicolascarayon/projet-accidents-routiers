@@ -5,15 +5,12 @@ from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
-SAMPLE_SIZE = 100000
-
-def generate_pickle(start_year, end_year, chk, sampled, filename):
-    df = load_proj_df(start_year, end_year, chk, sampled)
+def generate_pickle(df, filename):
     df.to_pickle(f"./{filename}")
 
 
-def load_proj_df(start_year, end_year, chk, sampled):
-    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, sampled, chk)
+def load_proj_df(start_year, end_year, chk=False):
+    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, chk)
     if chk:
         display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
 
@@ -25,16 +22,16 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = rmv_col_too_much_null(df, 0.08, chk)
         df = clean_categ_not_specified(df)
         df = drop_lines_with_null(df, chk)
-        df = create_col_age(df)
-        df = create_col_age_cls(df)
+        df = create_age(df)
+        df = create_age_cls(df)
         df = clean_col_dep(df, True)
         df = clean_nbv(df)
         df = clean_actp(df)
         df = clean_catv(df)
         df = clean_hrmn(df)
-        df = create_col_datetime(df)
-        df = create_col_joursem(df)
-        df = create_col_grav_lbl(df)
+        df = create_datetime(df)
+        df = create_joursem(df)
+        df = create_grav_lbl(df)
         df = drop_columns_from_df(df, ['an_nais'], chk)
         df = drop_columns_from_df(df, ['age'], chk)
         df = drop_columns_from_df(df, ['grav_lbl'], chk)    # drop column used only for data pre-analysis
@@ -47,8 +44,7 @@ def load_proj_df(start_year, end_year, chk, sampled):
         df = encode_grav(df, chk)
         df = set_target_first_column(df, chk)
 
-        if chk:
-            df.info(verbose=True, show_counts=True)
+        if chk: df.info(verbose=True, show_counts=True)
 
     return df
 
@@ -613,11 +609,11 @@ def proc_caract_gps(dic_caract):
             df = df.drop(columns=['gps'], axis=1)
     return df
 
-def create_col_age(df):
+def create_age(df):
     df['age'] = df['an'] - df['an_nais']
 
     return df
-def create_col_age_cls(df):
+def create_age_cls(df):
     # partially inspired from https://www.cerema.fr/system/files/documents/2017/11/rapport_classes_age_version_web_14032017_cle73f1e2.pdf
     # (Accidentalité et classes d'âge - Analyse des données 2011-2013 du fichier BAAC - Rapport de mars 2017
     df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()], labels=[0, 1, 2, 3, 4])
@@ -625,7 +621,7 @@ def create_col_age_cls(df):
     return df
 
 
-def create_col_datetime(df):
+def create_datetime(df):
     df['hr'] = [hrmn[0] + hrmn[1] for hrmn in df.hrmn]
     df['mn'] = [hrmn[3] + hrmn[4] for hrmn in df.hrmn]
     dic1 = {'an': 'year', 'mois': 'month', 'jour': 'day', 'hr': 'hour', 'mn': 'minute'}
@@ -638,24 +634,24 @@ def create_col_datetime(df):
     return df
 
 
-def create_col_grav_lbl(df):
+def create_grav_lbl(df):
     labels = ['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger']
     df['grav_lbl'] = [labels[grav - 1] for grav in df.grav]
 
     return df
 
 
-def create_col_joursem(df):
+def create_joursem(df):
     df['joursem'] = df["datetime"].dt.dayofweek
-    df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
-                                          ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'])
+    # df['joursem'] = df['joursem'].replace([0, 1, 2, 3, 4, 5, 6],
+    #                                       ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'])
     return df
 
 
 def clean_col_dep(df, chk):
     if chk: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
-    df['dep'] = [clean_dep_code(dep) for dep in df.dep]
+    df['dep'] = [clean_dep(dep) for dep in df.dep]
 
     if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
@@ -673,7 +669,7 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     return df
 
 
-def get_work_df(start_year, end_year, sampled, chk):
+def get_work_df(start_year, end_year, sample_size=None, chk=False):
     # load data into dictionnaries
     dic_usagers = load_usagers(start_year, end_year)
     dic_caract = load_caract(start_year, end_year)
@@ -692,8 +688,6 @@ def get_work_df(start_year, end_year, sampled, chk):
 
     # Merge dans un seul DataFrame
     df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
-
-    if sampled: df = df.sample(SAMPLE_SIZE)
 
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
 
@@ -727,31 +721,16 @@ def dep_codes_get():
     return dep_lst
 
 
-def clean_dep_code(dep):
+def clean_dep(dep):
     dep_clean = dep
     if len(dep) == 1:
         dep_clean = "0" + dep
     if len(dep) == 3 and dep[-1] == "0":
         dep_clean = dep[0:2]
-    if dep == '201': dep_clean = '20A'
-    if dep == '202': dep_clean = '20B'
+    if (dep == '201') or (dep == '20A'): dep_clean = '20'
+    if (dep == '202') or (dep == '20B'): dep_clean = '20'
 
     return dep_clean
-
-
-def clean_dep_code(dep):
-    dep_clean = dep
-    if len(dep) == 1:
-        dep_clean = "0" + dep
-
-    if len(dep) == 3 and dep[-1] == "0":
-        dep_clean = dep[0:2]
-
-    if dep == '201': dep_clean = '20A'
-    if dep == '202': dep_clean = '20B'
-
-    return dep_clean
-
 
 def clean_nbv(df):
     df['nbv'] = [-1 if nbv > 6 else nbv for nbv in df.nbv]
