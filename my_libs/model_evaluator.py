@@ -47,3 +47,5 @@ class ModelEvaluator:
         print("Classification report :")
         print(classification_report(self.y_test, y_pred))
         # print(classification_report_imbalanced(self.y_test, y_pred))
+
+        return model
