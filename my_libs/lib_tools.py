@@ -727,8 +727,8 @@ def clean_dep(dep):
         dep_clean = "0" + dep
     if len(dep) == 3 and dep[-1] == "0":
         dep_clean = dep[0:2]
-    if (dep == '201') or (dep == '20A'): dep_clean = '20'
-    if (dep == '202') or (dep == '20B'): dep_clean = '20'
+    if (dep == '201') or (dep == '2A'): dep_clean = '20'
+    if (dep == '202') or (dep == '2B'): dep_clean = '20'
 
     return dep_clean
 
