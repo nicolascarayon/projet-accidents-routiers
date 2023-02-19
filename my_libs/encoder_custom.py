@@ -22,13 +22,13 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y, datatype='Train'):
 
-        self.sampler = SMOTEN()
+        self.sampler = SMOTE()
 
         if datatype == 'Train':
-            X, y = self.sampler.fit_resample(X, y)
             X = self.encoder_target.fit_transform(X, y)
             X = self.encoder_onehot.fit_transform(X, y)
             X = self.scaler.fit_transform(X)
+            X, y = self.sampler.fit_resample(X, y)
 
         if datatype == 'Test':
             X  = self.encoder_target.transform(X)
