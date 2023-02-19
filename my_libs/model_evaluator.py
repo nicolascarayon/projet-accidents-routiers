@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from imblearn.metrics import classification_report_imbalanced
 from sklearn.metrics import classification_report
@@ -30,6 +30,10 @@ class ModelEvaluator:
                                            criterion=self.params['criterion'],
                                            max_depth=self.params['max_depth'],
                                            min_samples_split=self.params['min_samples_split'])
+
+        if self.model_type == 'GradientBoostingClassifier':
+            model = GradientBoostingClassifier(learning_rate=self.params['learning_rate'],
+                                           n_estimators=self.params['n_estimators'])
 
         model.fit(self.X_train, self.y_train)
 
