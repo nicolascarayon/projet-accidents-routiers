@@ -17,6 +17,7 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.scaler = StandardScaler()
         # self.sampler = SMOTE()
         self.sampler = SMOTEN()
+        # self.sampler = SMOTENC(categorical_features=['catv', 'agg', 'dep', 'col', 'catr', 'catu', 'trajet', 'locp', 'circ', 'situ', 'lum', 'age_cls'])
         # self.sampler        = RandomUnderSampler()
         # self.sampler        = RandomOverSampler()
 
@@ -34,11 +35,11 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
             print(f"X shape : {X.shape}")
 
             if len(self.cols_target_encoded)>0:
-                print(f"Columns target encoded : {self.cols_target_encoded}")
+                print(f"Columns target encoded : {list(self.cols_target_encoded)}")
                 X = self.encoder_target.fit_transform(X, y)
 
             X = self.encoder_onehot.fit_transform(X, y)
-            print(f"Columns one hot encoded : {self.cols_onehot_encoded}")
+            print(f"Columns one hot encoded : {list(self.cols_onehot_encoded)}")
 
             X = self.scaler.fit_transform(X)
             print(f"Features normalized")
