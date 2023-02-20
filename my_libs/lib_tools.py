@@ -738,7 +738,7 @@ def clean_nbv(df):
     return df
 
 def clean_actp(df):
-    df.actp = df.actp.replace(to_replace=[' -1'], value=['-1'])
+    df.actp = df.actp.replace(to_replace=[' -1', 'A', 'B'], value=[-1, 10, 11])
 
     return df
 def clean_catv(df):
