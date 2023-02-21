@@ -1,0 +1,13 @@
+Classes cardinality after resampling :
+0    97883
+1    97883
+Name: grav, dtype: int64
+X shape : (195766, 12)
+Columns target encoded : ['dep']
+Columns one hot encoded : ['catv', 'agg', 'col', 'catr', 'catu', 'trajet', 'locp', 'circ', 'situ', 'lum', 'age_cls']
+Features normalized
+--- Train set - features encoding performed in 2216.12 seconds ---
+--- Test set - features encoding performed in 1.04 seconds ---
+--- Test set - features encoding performed in 0.83 seconds ---
+
+Train dataset size : (195766, 70)
