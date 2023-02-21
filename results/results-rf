@@ -1,3 +1,14 @@
+[I 2023-02-21 11:52:52,546] Trial 9 finished with value: 0.8153979908554561 and parameters:
+{'classifier': 'RandomForestClassifier', 'n_estimators': 137, 'criterion': 'entropy', 'max_depth': 5, 'min_samples_split': 5}.
+Best is trial 4 with value: 0.8160849802813811.
+
+--- Optimization with Optuna performed in 1229.1335225105286 seconds ---
+Best params : {'classifier': 'RandomForestClassifier', 'n_estimators': 70, 'criterion': 'entropy', 'max_depth': 2, 'min_samples_split': 5}
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
 2023-02-18-16-10
 Random Forest GridSearchCV :
 

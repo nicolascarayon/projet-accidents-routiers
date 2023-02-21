@@ -1,3 +1,17 @@
+20230221-1338 :
+
+X_train : (97726, 12) - y_train : (97726,)
+--- Smote applied in 374.81457018852234 seconds ---
+
+[I 2023-02-21 13:29:04,869] Trial 4 finished with value: 0.7316633854191291 and
+parameters: {'classifier': 'CatBoostClassifier', 'iterations': 186, 'learning_rate': 0.01354539363047107}.
+Best is trial 3 with value: 0.7480232297747341.
+
+[I 2023-02-21 13:28:09,287] Trial 3 finished with value: 0.7480232297747341 and
+parameters: {'classifier': 'CatBoostClassifier', 'iterations': 206, 'learning_rate': 0.08111479185293684}.
+Best is trial 3 with value: 0.7480232297747341.
+
+----------------------------------------------------------------------------------------
 20230218-1751 :
 
 model = CatBoostClassifier()

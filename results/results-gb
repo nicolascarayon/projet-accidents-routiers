@@ -1,3 +1,25 @@
+RESULTS WITH SMOTE APPLIED ONLY ON TRAIN DATA
+
+[I 2023-02-21 12:34:14,647] Trial 9 finished with value: 0.7649456961337847 and
+parameters: {'classifier': 'GradientBoostingClassifier', 'learning_rate': 0.3291484562788087, 'n_estimators': 113}.
+Best is trial 9 with value: 0.7649456961337847.
+
+--- Optimization with Optuna performed in 1370.2302522659302 seconds ---
+Best params : {'classifier': 'GradientBoostingClassifier', 'learning_rate': 0.3291484562788087, 'n_estimators': 113}
+
+Classification report :
+              precision    recall  f1-score   support
+
+           0       0.91      0.74      0.82     16297
+           1       0.38      0.70      0.49      3702
+
+    accuracy                           0.73     19999
+   macro avg       0.65      0.72      0.66     19999
+weighted avg       0.82      0.73      0.76     19999
+
+
+
+----------------------------------------------------------------------------------------
 Gradient Boosting - SMOTE
 
 params = {

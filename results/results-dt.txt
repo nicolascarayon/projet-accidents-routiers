@@ -1,3 +1,48 @@
+RESULTS WITH SMOTE APPLIED ONLY ON TRAIN DATA
+
+sample size = 100000 -----------------------------------------------------------------------------------------------
+
+[I 2023-02-21 10:33:22,963] Trial 49 finished with value: 0.7940376187958333 and
+parameters: {'classifier': 'DecisionTreeClassifier', 'criterion': 'gini', 'splitter': 'best', 'max_depth': 229, 'min_samples_split': 6}.
+Best is trial 35 with value: 0.7975938486572053.
+
+--- Optimization with Optuna performed in 397.6700773239136 seconds ---
+Best params : {'classifier': 'DecisionTreeClassifier', 'criterion': 'entropy', 'splitter': 'best', 'max_depth': 180, 'min_samples_split': 2}
+
+
+
+sample size = 200000 -----------------------------------------------------------------------------------------------
+
+[I 2023-02-21 08:29:21,599] Trial 49 finished with value: 0.7968767330470954
+and parameters: {'classifier': 'DecisionTreeClassifier', 'criterion': 'entropy', 'splitter': 'best', 'max_depth': 51, 'min_samples_split': 6}.
+Best is trial 31 with value: 0.8008841729603475.
+
+--- Optimization with Optuna performed in 810.6341602802277 seconds ---
+Best params : {'classifier': 'DecisionTreeClassifier', 'criterion': 'entropy', 'splitter': 'best', 'max_depth': 89, 'min_samples_split': 2}
+
+Train dataset size : (195766, 70)
+
+--- Model DecisionTreeClassifier fit and trained in 4.423078298568726 seconds ---
+--- Params : {'criterion': 'entropy', 'splitter': 'best', 'max_depth': 89, 'min_samples_split': 2}
+
+    0       1
+0   23198   9314
+1   3588    3899
+
+Classification report :
+              precision    recall  f1-score   support
+
+           0       0.87      0.71      0.78     32512
+           1       0.30      0.52      0.38      7487
+
+    accuracy                           0.68     39999
+   macro avg       0.58      0.62      0.58     39999
+weighted avg       0.76      0.68      0.71     39999
+
+
+--------------------------------------------------------------------------------------------------------------------
+RESULTS WITH SMOTE APPLIED ON TEST DATA
+
 Decision tree - with SMOTE()
 params = {
     'max_depth' : [10, 20, 30, 40 ,50],
