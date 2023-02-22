@@ -28,15 +28,7 @@ def load_proj_df(start_year, end_year, chk=False):
         df = create_datetime(df)
         df = create_joursem(df)
         df = create_grav_lbl(df)
-        df = drop_columns_from_df(df, ['an_nais'], chk)
-        df = drop_columns_from_df(df, ['age'], chk)
-        df = drop_columns_from_df(df, ['grav_lbl'], chk)    # drop column used only for data pre-analysis
-        df = drop_columns_from_df(df, ['Num_Acc'], chk)
-        df = drop_columns_from_df(df, ['datetime'], chk)
-        df = drop_columns_from_df(df, ['an'], chk)
-        df = drop_columns_from_df(df, ['num_veh'], chk)
-        df = drop_columns_from_df(df, ['jour'], chk)
-        df = drop_columns_from_df(df, ['hrmn'], chk)
+        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], chk)
         df = encode_grav(df, chk)
         df = set_target_first_column(df, chk)
 
