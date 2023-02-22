@@ -1,3 +1,41 @@
+import pandas as pd
+
+dic_features = {'grav'   : 'Gravité',
+                'place ' : "Place de l'usager",
+                'catu'   : "Catégorie de l'usager",
+                'sexe'   : "sexe de l'usager",
+                'trajet' : 'Motif du déplacement',
+                'locp'   : 'Localisation du piéton',
+                'actp'   : 'Action du piéton',
+                'etatp'  : 'Piéton seul?',
+                'mois'   : 'Mois',
+                'lum'    : 'Conditions de luminosité',
+                'agg'    : 'Localisation',
+                'int'    : 'Intersection',
+                'atm'    : 'Conditions atmosphériques',
+                'col'    : 'Type de collision',
+                'dep'    : 'Département',
+                'catr'   : 'Catégorie de route',
+                'circ'   : 'Conditions de circulation',
+                'nbv'    : 'Nombre de voies',
+                'vosp'   : 'Voie réservée?',
+                'prof'   : 'profil de la route',
+                'plan'   : 'tracé en plan',
+                'surf'   : 'Etat de la surface',
+                'infra'  : 'Aménagement - Infrastructure',
+                'situ'   : "Situation de l'accident",
+                'catv'   : 'Catégorie de véhicule',
+                'age_cls': "Classe d'âge",
+                'joursem': 'Jour de la semaine'}
+
+dic_catv = {-1: 'Autres',
+            1: 'Bicyclette',
+            2: 'Cyclomoteur <50cm3',
+            7: 'VL seul',
+            10: 'VU seul',
+            30: 'Scooter <50cm3',
+            33: 'Motocyclette >125cm3'}
+
 dic_lum = {'def': 'Condition de luminosité',
            1: 'Plein jour',
            2: 'Crépuscule ou aube',
@@ -6,10 +44,8 @@ dic_lum = {'def': 'Condition de luminosité',
            5: 'Nuit avec éclairage public allumé'}
 
 dic_grav = {'def': 'Gravité',
-            1: 'Indemne',
-            2: 'Tué',
-            3: 'Blessé hospitalisé',
-            4: 'Blessé léger'}
+            0: 'Indemne - Blessé léger',
+            1: 'Tué - Blessé hospitalisé'}
 
 dic_catu = {'def': "Catégorie d'usager",
             1: 'Conducteur',
@@ -134,6 +170,16 @@ dic_locp = {'def': 'Localisation du piéton',
             7: 'Sur refuge ou BAU',
             8: 'Sur contre allée',
             9: 'Inconnue'}
+
+
+dic_preproc = [{'col': 'catv',
+                'mapping': pd.Series(data=[-1,1,2,7,10,30,33], index=['Autres','Bicyclette','Cyclomoteur <50cm3','VL seul','VU seul','Scooter <50cm3','Motocyclette >125cm3']),
+                'data_type':'object'},
+               {'col': 'agg',
+                'mapping': pd.Series(data=[1,2], index=['Hors agglomération','En agglomération']),
+                'data_type':'object'},
+               ]
+
 
 def get_labels(varname, value):
     if varname == 'lum'   : return dic_lum[value]
