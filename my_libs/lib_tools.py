@@ -5,10 +5,6 @@ from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
-def generate_pickle(df, filename):
-    df.to_pickle(f"./{filename}")
-
-
 def load_proj_df(start_year, end_year, chk=False):
     df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, chk)
     if chk:
