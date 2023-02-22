@@ -5,19 +5,26 @@ from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
-def load_proj_df(start_year, end_year, chk=False):
-    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, chk)
-    if chk:
+def load_proj_df(start_year, end_year, verbose=0):
+    """
+    Returns into a DataFrame the data on the period [start_year, end_year]
+
+    :param start_year: year defining the lower bound of the period
+    :param end_year:   year defining the higher bound of the period
+    :param verbose:    if 1 the execution is verbose
+    """
+    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, verbose)
+    if verbose:
         display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
 
         # rmv col related to geographical info
-        df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], chk)
+        df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], verbose)
         # rmv col not known before the accident
-        df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], chk)
+        df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], verbose)
 
-        df = rmv_col_too_much_null(df, 0.08, chk)
+        df = rmv_col_too_much_null(df, 0.08, verbose)
         df = clean_categ_not_specified(df)
-        df = drop_lines_with_null(df, chk)
+        df = drop_lines_with_null(df, verbose)
         df = create_age(df)
         df = create_age_cls(df)
         df = clean_col_dep(df, True)
@@ -28,11 +35,11 @@ def load_proj_df(start_year, end_year, chk=False):
         df = create_datetime(df)
         df = create_joursem(df)
         df = create_grav_lbl(df)
-        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], chk)
-        df = encode_grav(df, chk)
-        df = set_target_first_column(df, chk)
+        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
+        df = encode_grav(df, verbose)
+        df = set_target_first_column(df, verbose)
 
-        if chk: df.info(verbose=True, show_counts=True)
+        if verbose: df.info(verbose=True, show_counts=True)
 
     return df
 
@@ -418,16 +425,16 @@ def get_cl_age(age):
         return '>53'
 
 
-def preproc_usagers(dic_usagers, chk):
-    df_usagers = concat_df_from_dict(dic_usagers, chk)
-    df_usagers = manage_duplicated(df_usagers, chk)
+def preproc_usagers(dic_usagers, verbose):
+    df_usagers = concat_df_from_dict(dic_usagers, verbose)
+    df_usagers = manage_duplicated(df_usagers, verbose)
 
     return df_usagers
 
 
-def preproc_caract(dic_caract, chk):
-    df_caract = concat_df_from_dict(dic_caract, chk)
-    df_caract = manage_duplicated(df_caract, chk)
+def preproc_caract(dic_caract, verbose):
+    df_caract = concat_df_from_dict(dic_caract, verbose)
+    df_caract = manage_duplicated(df_caract, verbose)
     df_caract['an'] = df_caract['an'].replace(
         to_replace=[5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
         value=[2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
@@ -436,22 +443,22 @@ def preproc_caract(dic_caract, chk):
     return df_caract
 
 
-def preproc_vehic(dic_vehic, chk):
-    df_vehic = concat_df_from_dict(dic_vehic, chk)
-    df_vehic = manage_duplicated(df_vehic, chk)
-    df_vehic = manage_vehic_duplicated(df_vehic, chk)
+def preproc_vehic(dic_vehic, verbose):
+    df_vehic = concat_df_from_dict(dic_vehic, verbose)
+    df_vehic = manage_duplicated(df_vehic, verbose)
+    df_vehic = manage_vehic_duplicated(df_vehic, verbose)
 
     return df_vehic
 
 
-def preproc_lieux(dic_lieux, chk):
-    df_lieux = concat_df_from_dict(dic_lieux, chk)
-    df_lieux = manage_duplicated(df_lieux, chk)
+def preproc_lieux(dic_lieux, verbose):
+    df_lieux = concat_df_from_dict(dic_lieux, verbose)
+    df_lieux = manage_duplicated(df_lieux, verbose)
 
     return df_lieux
 
 
-def concat_df_from_dict(dic, chk):
+def concat_df_from_dict(dic, verbose):
     [start_year, end_year] = get_start_end_years_from_dic(dic)
     for year in dic.keys():
         df = dic[year]
@@ -459,15 +466,15 @@ def concat_df_from_dict(dic, chk):
             df_final = df
         else:
             df_final = pd.concat([df_final, df], ignore_index=True, axis=0)
-    if chk:
+    if verbose:
         chk_concat(dic, df_final)
     return df_final
 
 
-def manage_duplicated(df, chk):
-    if chk: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
+def manage_duplicated(df, verbose):
+    if verbose: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
     df = df.drop_duplicates()
-    if chk: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
+    if verbose: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
 
     return df
 
@@ -496,7 +503,7 @@ def get_col_minusone_allowed():
             'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
 
 
-def replace_null_mode(df, chk):
+def replace_null_mode(df, verbose):
     cols = df.columns[df.isnull().any()]
     k = 0
     for col in cols:
@@ -504,34 +511,34 @@ def replace_null_mode(df, chk):
         df = df.fillna(mode)
         # df_all = df_all.fillna(df_all[col].value_counts().index[0])  # faster than mode()[0]
         k += 1
-        if chk: print(f"{col}\t-> ok (nan replaced with {mode}) \t- {len(cols) - k} columns remaining...")
+        if verbose: print(f"{col}\t-> ok (nan replaced with {mode}) \t- {len(cols) - k} columns remaining...")
 
     return df
 
 
-def rmv_col_too_much_null(df, threshold, chk):
+def rmv_col_too_much_null(df, threshold, verbose):
     rate_missing = df.isnull().sum() / len(df)
     df_miss = pd.DataFrame({'column_name': df.columns, 'rate_missing': rate_missing})
     df_miss.sort_values('rate_missing', inplace=True, ascending=False)
     to_drop = df_miss[df_miss.rate_missing >= threshold]['column_name']
     df = df.drop(columns=to_drop.index, axis=1)
 
-    if chk:
+    if verbose:
         df_miss.rate_missing *= 100
         print(f"Colonnes supprimées : {to_drop.index}")
         print(f"\n{df_miss}")
     return df
 
 
-def manage_vehic_duplicated(df_vehic, chk):
-    if chk:
+def manage_vehic_duplicated(df_vehic, verbose):
+    if verbose:
         df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
         print(
             f"Véhicules en doublons vis à vis de la clé fonctionnelle avant traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
 
     df_vehic.drop_duplicates(['Num_Acc', 'num_veh'], keep='first', inplace=True)
 
-    if chk:
+    if verbose:
         df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
         print(
             f"Véhicules en doublons vis à vis de la clé fonctionnelle après traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
@@ -636,12 +643,12 @@ def create_joursem(df):
     return df
 
 
-def clean_col_dep(df, chk):
-    if chk: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+def clean_col_dep(df, verbose):
+    if verbose: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     df['dep'] = [clean_dep(dep) for dep in df.dep]
 
-    if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+    if verbose: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
 
@@ -657,7 +664,7 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     return df
 
 
-def get_work_df(start_year, end_year, sample_size=None, chk=False):
+def get_work_df(start_year, end_year, sample_size=None, verbose=0):
     # load data into dictionnaries
     dic_usagers = load_usagers(start_year, end_year)
     dic_caract = load_caract(start_year, end_year)
@@ -665,14 +672,14 @@ def get_work_df(start_year, end_year, sample_size=None, chk=False):
     dic_lieux = load_lieux(start_year, end_year)
 
     # Preprocessings pour la construction de : df_usagers, df_caract, df_vehic, df_lieux
-    if chk: print(f"\nusagers :")
-    df_usagers = preproc_usagers(dic_usagers, chk)
-    if chk: print(f"\ncaractéristiques :")
-    df_caract = preproc_caract(dic_caract, chk)
-    if chk: print(f"\nvéhicules :")
-    df_vehic = preproc_vehic(dic_vehic, chk)
-    if chk: print(f"\nlieux :")
-    df_lieux = preproc_lieux(dic_lieux, chk)
+    if verbose: print(f"\nusagers :")
+    df_usagers = preproc_usagers(dic_usagers, verbose)
+    if verbose: print(f"\ncaractéristiques :")
+    df_caract = preproc_caract(dic_caract, verbose)
+    if verbose: print(f"\nvéhicules :")
+    df_vehic = preproc_vehic(dic_vehic, verbose)
+    if verbose: print(f"\nlieux :")
+    df_lieux = preproc_lieux(dic_lieux, verbose)
 
     # Merge dans un seul DataFrame
     df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
@@ -747,13 +754,13 @@ def clean_hrmn(df):
     return df
 
 
-def drop_lines_with_null(df, chk):
-    if chk:
+def drop_lines_with_null(df, verbose):
+    if verbose:
         print("Suppression des lignes avec Null : ")
         nb_bef = df.shape[0]
         print(f"Nombre de lignes avant : {nb_bef}")
     df = df.dropna(axis=0, how='any')
-    if chk:
+    if verbose:
         nb_aft = df.shape[0]
         print(f"Nombre de lignes après : {nb_aft}")
         print(f"Taux de perte : {(nb_bef - nb_aft) / nb_aft * 100:.2f} %")
@@ -761,11 +768,11 @@ def drop_lines_with_null(df, chk):
     return df
 
 
-def drop_columns_from_df(df, columns, chk):
+def drop_columns_from_df(df, columns, verbose):
     for col in columns:
         if col in df.columns:
             df = df.drop(columns=col, axis=1)
-    if chk:
+    if verbose:
         for col in columns:
             if not (col in df.columns):
                 print(f"Column {col} correctly dropped from DataFrame")
@@ -781,10 +788,10 @@ def get_hh_mn(chaine):
     if len(chaine) > 4: return chaine
 
 
-def set_target_first_column(df, chk):
+def set_target_first_column(df, verbose):
     col = df.pop("grav")
     df.insert(0, col.name, col)
-    if chk:
+    if verbose:
         print("'grav' has been set as first column")
         df.head()
     return df
@@ -809,24 +816,24 @@ def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start
         print(f"nombre de lignes max : {max(nb_lin)}")
 
 
-def encode_dummies_col(df, col, chk):
+def encode_dummies_col(df, col, verbose):
     df_encoded = df.join(pd.get_dummies(df[col], prefix=col))
     df_encoded = df_encoded.drop(columns=[col], axis=1)
-    if chk: print(f"Column {col} has been dummies encoded")
+    if verbose: print(f"Column {col} has been dummies encoded")
 
     return df_encoded
 
-def encode_target_col(df, col, target, chk):
+def encode_target_col(df, col, target, verbose):
     encoder = TargetEncoder()
     df[f"{col}"] = encoder.fit_transform(df[col].astype('str'), target)
     # df = df.drop(columns=[col], axis=1)
-    if chk: print(f"Column {col} has been target encoded")
+    if verbose: print(f"Column {col} has been target encoded")
 
     return df
 
-def encode_grav(df, chk):
+def encode_grav(df, verbose):
     df['grav'] = df['grav'].replace(to_replace=[[1, 4], [2, 3]], value=[0, 1]).astype('int')
-    if chk : print(f"column grav encoded into 2 classes")
+    if verbose : print(f"column grav encoded into 2 classes")
 
     return df
 
