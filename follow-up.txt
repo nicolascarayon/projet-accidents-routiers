@@ -8,6 +8,7 @@
        - Création de classes d'âge
        - One Hot encoding pour les départements
 - Essayer la lib Optuna en remplacement de GridSearchCV() pour optimiser les modèles
+     - regarder la video de démo
 - Passer à la 3° phase avec CatBoost (excellent candidat pour le travail sur données catégorielles)
 - Essayer de comprendre pourquoi le modéle se trompe par analyse des erreurs (picking + détection de patterns)
 - Procéder à l'interprétation du modèle simple et du modèle boosté
