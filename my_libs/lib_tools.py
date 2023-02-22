@@ -189,28 +189,6 @@ def load_vehicules(start_year, end_year):
             vehic[year] = pd.read_csv(DIR_DATA_GOUV + f'vehicules{car}{year}.csv', sep=sep, dtype=dic_types)
     return vehic
 
-
-def load_data_kagg():
-    """Retourne les données dans un dictionnaire de DataFrames dont la clé est le type de donnée
-
-    ex : my_dict = load_data_kagg(my_folder)
-    les données des usagers sont accessibles via la clé 'usagers' : df_usagers = my_dict['usagers']
-    les clés disponibles sont :
-     - 'caracts'
-     - 'lieux'
-     - 'usagers'
-     - 'vacances'
-     - 'vehics'
-    """
-    data_dict = {'caract': pd.read_csv(DIR_DATA_KAGG + 'caracteristics.csv', sep=',', encoding='ISO-8859-1'),
-                 'lieux': pd.read_csv(DIR_DATA_KAGG + 'places.csv', sep=','),
-                 'usagers': pd.read_csv(DIR_DATA_KAGG + 'users.csv', sep=','),
-                 'vacances': pd.read_csv(DIR_DATA_KAGG + 'holidays.csv', sep=','),
-                 'vehic': pd.read_csv(DIR_DATA_KAGG + 'vehicles.csv', sep=',')
-                 }
-    return data_dict
-
-
 def get_labels(varname, value):
     if varname == 'lum':
         if value == 1:
