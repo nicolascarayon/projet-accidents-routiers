@@ -238,6 +238,12 @@ def preproc_lieux(dic_lieux, verbose):
 
 
 def concat_df_from_dict(dic, verbose):
+    """
+    Concatenates all DataFrames contained in dic in one sigle DataFrame
+    :param dic: A dictionary with key value pairs like dic[year] = dataframe
+    :param verbose: 1 to display information message
+    :return: a DataFrame fed consistenly with all data from dic
+    """
     [start_year, end_year] = get_start_end_years_from_dic(dic)
     for year in dic.keys():
         df = dic[year]
@@ -251,6 +257,12 @@ def concat_df_from_dict(dic, verbose):
 
 
 def manage_duplicated(df, verbose):
+    """
+    Removes the duplicates in df
+    :param df: the DataFrame
+    :param verbose: 1 to display information
+    :return: the df with no duplicate
+    """
     if verbose: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
     df = df.drop_duplicates()
     if verbose: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
@@ -258,13 +270,17 @@ def manage_duplicated(df, verbose):
     return df
 
 
-def manage_not_specified(df):
-    df = df.replace(to_replace=['-1', ' -1'], value='-1')
-    return df
-
-
 def clean_categ_not_specified(df):
-    col_minusone = get_col_minusone_allowed()
+    """
+    Replaces in df the nan by -1 in columns where -1 is allowed
+    :param df: the dataframe to be updated
+    :return: the dataframe with non replaced by -1
+    """
+    col_minusone = ['place', 'catu', 'grav', 'sexe', 'trajet', 'secu', 'locp', 'actp',
+                    'etatp', 'secu1', 'secu2', 'secu3', 'lum', 'agg', 'int', 'atm',
+                    'col', 'catr', 'circ', 'nbv', 'vosp', 'prof', 'plan', 'lartpc',
+                    'larrout', 'surf', 'infra', 'situ', 'env1', 'vma', 'senc', 'catv',
+                    'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
     col_to_chk = []
     for col in col_minusone:
         if col in df.columns:
@@ -272,14 +288,6 @@ def clean_categ_not_specified(df):
     df[col_to_chk] = df[col_to_chk].replace(to_replace=np.nan, value=-1)
 
     return df
-
-
-def get_col_minusone_allowed():
-    return ['place', 'catu', 'grav', 'sexe', 'trajet', 'secu', 'locp', 'actp',
-            'etatp', 'secu1', 'secu2', 'secu3', 'lum', 'agg', 'int', 'atm',
-            'col', 'catr', 'circ', 'nbv', 'vosp', 'prof', 'plan', 'lartpc',
-            'larrout', 'surf', 'infra', 'situ', 'env1', 'vma', 'senc', 'catv',
-            'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
 
 
 def replace_null_mode(df, verbose):
