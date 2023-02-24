@@ -5,6 +5,8 @@ from sklearn.preprocessing import OneHotEncoder
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 DIR_DATA_KAGG = ".\\data\\kaggle\\"
+
+
 def load_proj_df(start_year, end_year, verbose=0):
     """
     Returns into a DataFrame the data on the period [start_year, end_year]
@@ -188,6 +190,7 @@ def load_vehicules(start_year, end_year):
         if 2005 <= year <= 2021:
             vehic[year] = pd.read_csv(DIR_DATA_GOUV + f'vehicules{car}{year}.csv', sep=sep, dtype=dic_types)
     return vehic
+
 
 # DATA PRE-PROCESSING --------------------------------------------
 def get_cl_age(age):
@@ -380,14 +383,18 @@ def proc_caract_gps(dic_caract):
             df = df.drop(columns=['gps'], axis=1)
     return df
 
+
 def create_age(df):
     df['age'] = df['an'] - df['an_nais']
 
     return df
+
+
 def create_age_cls(df):
     # partially inspired from https://www.cerema.fr/system/files/documents/2017/11/rapport_classes_age_version_web_14032017_cle73f1e2.pdf
     # (Accidentalité et classes d'âge - Analyse des données 2011-2013 du fichier BAAC - Rapport de mars 2017
-    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()], labels=[0, 1, 2, 3, 4])
+    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min() - 1, 15, 25, 45, 65, df['age'].max()],
+                           labels=[0, 1, 2, 3, 4])
 
     return df
 
@@ -503,15 +510,19 @@ def clean_dep(dep):
 
     return dep_clean
 
+
 def clean_nbv(df):
     df['nbv'] = [-1 if nbv > 6 else nbv for nbv in df.nbv]
 
     return df
 
+
 def clean_actp(df):
     df.actp = df.actp.replace(to_replace=[' -1', 'A', 'B'], value=[-1, 10, 11])
 
     return df
+
+
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
 
@@ -599,19 +610,13 @@ def encode_dummies_col(df, col, verbose):
 
     return df_encoded
 
-def encode_target_col(df, col, target, verbose):
-    encoder = TargetEncoder()
-    df[f"{col}"] = encoder.fit_transform(df[col].astype('str'), target)
-    # df = df.drop(columns=[col], axis=1)
-    if verbose: print(f"Column {col} has been target encoded")
-
-    return df
 
 def encode_grav(df, verbose):
     df['grav'] = df['grav'].replace(to_replace=[[1, 4], [2, 3]], value=[0, 1]).astype('int')
-    if verbose : print(f"column grav encoded into 2 classes")
+    if verbose: print(f"column grav encoded into 2 classes")
 
     return df
+
 
 def train_test_split_along_time(data, target, year):
     filter_train = data.an < year
@@ -623,18 +628,21 @@ def train_test_split_along_time(data, target, year):
 
     return X_train, y_train, X_test, y_test
 
-def get_train_valid_test_data(filename_train, filename_test, columns=None):
+
+def get_train_valid_test_data(run_type, columns=None):
+    if run_type == 'dev': filename_train, filename_test = 'pickles/df-dev-train.pkl', 'pickles/df-dev-test.pkl'
+    if run_type == 'prd': filename_train, filename_test = 'pickles/df-prd.pkl', 'pickles/df-prd.pkl'
 
     df_train = pd.read_pickle(f'./{filename_train}')
-    df_test  = pd.read_pickle(f'./{filename_test}')
+    df_test = pd.read_pickle(f'./{filename_test}')
 
     data_train = df_train.iloc[:, 1:]
     target_train = df_train['grav']
-    if not (columns==None): data_train = data_train[columns]
+    if not (columns == None): data_train = data_train[columns]
 
     data_test = df_test.iloc[:, 1:]
     target_test = df_test['grav']
-    if not (columns==None): data_test = data_test[columns]
+    if not (columns == None): data_test = data_test[columns]
 
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
