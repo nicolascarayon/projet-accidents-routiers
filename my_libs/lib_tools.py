@@ -1,10 +1,14 @@
 import pandas as pd
 import numpy as np
-from category_encoders import TargetEncoder
-from sklearn.preprocessing import OneHotEncoder
+import time
+from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTEN
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
-DIR_DATA_KAGG = ".\\data\\kaggle\\"
+DF_DEV_TRAIN_DATA = 'pickles/df-dev-train.pkl'
+DF_DEV_TEST_DATA = 'pickles/df-dev-test.pkl'
+DF_PRD_TRAIN_DATA = 'pickles/df-prd-train.pkl'
+DF_PRD_TEST_DATA = 'pickles/df-prd-test.pkl'
 
 
 def load_proj_df(start_year, end_year, verbose=0):
@@ -37,7 +41,9 @@ def load_proj_df(start_year, end_year, verbose=0):
         df = create_datetime(df)
         df = create_joursem(df)
         df = create_grav_lbl(df)
-        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
+        # df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
+        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'num_veh', 'jour', 'hrmn'],
+                                  verbose)
         df = encode_grav(df, verbose)
         df = set_target_first_column(df, verbose)
 
@@ -638,22 +644,34 @@ def train_test_split_along_time(data, target, year):
 
 
 def get_train_valid_test_data(run_type, columns=None):
-    if run_type == 'dev': filename_train, filename_test = 'pickles/df-dev-train.pkl', 'pickles/df-dev-test.pkl'
-    if run_type == 'prd': filename_train, filename_test = 'pickles/df-prd.pkl', 'pickles/df-prd.pkl'
+    if run_type == 'dev': file_train, file_test = DF_DEV_TRAIN_DATA, DF_DEV_TEST_DATA
+    if run_type == 'prd': file_train, file_test = DF_PRD_TRAIN_DATA, DF_PRD_TEST_DATA
 
-    df_train = pd.read_pickle(f'./{filename_train}')
-    df_test = pd.read_pickle(f'./{filename_test}')
+    df_train, df_test = pd.read_pickle(f'./{file_train}'), pd.read_pickle(f'./{file_test}')
 
-    data_train = df_train.iloc[:, 1:]
-    target_train = df_train['grav']
-    if not (columns == None): data_train = data_train[columns]
+    data_train, X_test = df_train.iloc[:, 1:], df_test.iloc[:, 1:]
 
-    data_test = df_test.iloc[:, 1:]
-    target_test = df_test['grav']
-    if not (columns == None): data_test = data_test[columns]
+    target_train, y_test = df_train['grav'], df_test['grav']
 
-    from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
-    X_test_final, y_test_final = data_test, target_test
+    if not (columns is None): data_train, X_test = data_train[columns], X_test[columns]
 
-    return X_train, y_train, X_test, y_test, X_test_final, y_test_final
+    X_train, X_valid, y_train, y_valid, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
+
+    return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+def get_data_resampled(X, y, verbose=0):
+    sampler = SMOTEN()
+
+    start_time = time.time()
+    X_rs, y_rs = sampler.fit_resample(X, y)
+    if 'actp' in X.columns: X_rs['actp'] = X_rs['actp'].astype('int')
+    if 'dep' in X.columns: X_rs['dep'] = X_rs['dep'].astype('int')
+
+    if verbose:
+        print(f"--- Smote applied in %s seconds ---" % (time.time() - start_time))
+        print("Classes cardinality after resampling :")
+        print(y_rs.value_counts())
+        print(f"X shape : {X.shape} -> {X_rs.shape}")
+        print(f"y shape : {y.shape} -> {y_rs.shape}")
+
+    return X_rs, y_rs
