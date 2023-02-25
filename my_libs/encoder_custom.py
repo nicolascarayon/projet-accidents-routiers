@@ -1,7 +1,6 @@
 import time
 from sklearn.base import BaseEstimator, TransformerMixin
 from category_encoders import TargetEncoder, OneHotEncoder
-from sklearn.preprocessing import StandardScaler
 
 import pandas as pd
 
@@ -13,7 +12,6 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.cols_onehot_encoded = cols_onehot_encoded
         self.encoder_target = TargetEncoder(cols=cols_target_encoded)
         self.encoder_onehot = OneHotEncoder(cols=cols_onehot_encoded)
-        self.scaler = StandardScaler()
 
     def fit(self, X, y):
         return self
@@ -32,13 +30,11 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
                 X = self.encoder_onehot.fit_transform(X, y)
                 print(f"Columns one hot encoded : {list(self.cols_onehot_encoded)}")
 
-            X = self.scaler.fit_transform(X)
             print(f"Features normalized")
 
         if datatype == 'Test':
             X = self.encoder_target.transform(X)
             X = self.encoder_onehot.transform(X)
-            X = self.scaler.transform(X)
 
         time_spent = time.time() - start_time
         print(f"--- {datatype} set - features encoding performed in {time_spent:.2f} seconds ---")
