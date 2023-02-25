@@ -5,11 +5,13 @@ from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTEN
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
-DF_DEV_TRAIN_DATA = 'pickles/df-dev-train.pkl'
-DF_DEV_TEST_DATA = 'pickles/df-dev-test.pkl'
-DF_PRD_TRAIN_DATA = 'pickles/df-prd-train.pkl'
-DF_PRD_TEST_DATA = 'pickles/df-prd-test.pkl'
 
+DF_DEV_TRAIN_PATH = 'pickles/df-dev-train.pkl'
+DF_DEV_TEST_PATH  = 'pickles/df-dev-test.pkl'
+DF_PRD_TRAIN_PATH = 'pickles/df-prd-train.pkl'
+DF_PRD_TEST_PATH  = 'pickles/df-prd-test.pkl'
+DF_GPU_TRAIN_PATH = 'pickles/df-gpu-train.pkl'
+DF_GPU_TEST_PATH  = 'pickles/df-gpu-test.pkl'
 
 def load_proj_df(start_year, end_year, verbose=0):
     """
