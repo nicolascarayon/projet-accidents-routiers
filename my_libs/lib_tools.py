@@ -646,6 +646,7 @@ def train_test_split_along_time(data, target, year):
 def get_train_valid_test_data(run_type, columns=None):
     if run_type == 'dev': file_train, file_test = DF_DEV_TRAIN_DATA, DF_DEV_TEST_DATA
     if run_type == 'prd': file_train, file_test = DF_PRD_TRAIN_DATA, DF_PRD_TEST_DATA
+    if run_type == 'gpu': file_train, file_test = DF_GPU_TRAIN_DATA, DF_GPU_TEST_DATA
 
     df_train, df_test = pd.read_pickle(f'./{file_train}'), pd.read_pickle(f'./{file_test}')
 
