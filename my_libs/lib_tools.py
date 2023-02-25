@@ -658,7 +658,7 @@ def get_train_valid_test_data(run_type, columns=None):
     return X_train, y_train, X_valid, y_valid, X_test, y_test
 
 def get_data_resampled(X, y, verbose=0):
-    sampler = SMOTEN()
+    sampler = SMOTEN(sampling_strategy='auto', k_neighbors=5, n_jobs=-1)
 
     start_time = time.time()
     X_rs, y_rs = sampler.fit_resample(X, y)
