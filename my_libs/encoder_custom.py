@@ -1,9 +1,7 @@
 import time
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from category_encoders import TargetEncoder, OneHotEncoder
-
-import pandas as pd
-
 
 class EncoderCustom(BaseEstimator, TransformerMixin):
     def __init__(self, cols_target_encoded=[], cols_onehot_encoded=[], trace=False):
@@ -12,7 +10,6 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
         self.cols_onehot_encoded = cols_onehot_encoded
         self.encoder_target = TargetEncoder(cols=cols_target_encoded)
         self.encoder_onehot = OneHotEncoder(cols=cols_onehot_encoded)
-
     def fit(self, X, y):
         return self
 
@@ -29,8 +26,6 @@ class EncoderCustom(BaseEstimator, TransformerMixin):
             if len(self.cols_onehot_encoded) > 0:
                 X = self.encoder_onehot.fit_transform(X, y)
                 print(f"Columns one hot encoded : {list(self.cols_onehot_encoded)}")
-
-            print(f"Features normalized")
 
         if datatype == 'Test':
             X = self.encoder_target.transform(X)
