@@ -10,8 +10,6 @@ DF_DEV_TRAIN_PATH = 'pickles/df-dev-train.pkl'
 DF_DEV_TEST_PATH  = 'pickles/df-dev-test.pkl'
 DF_PRD_TRAIN_PATH = 'pickles/df-prd-train.pkl'
 DF_PRD_TEST_PATH  = 'pickles/df-prd-test.pkl'
-DF_GPU_TRAIN_PATH = 'pickles/df-gpu-train.pkl'
-DF_GPU_TEST_PATH  = 'pickles/df-gpu-test.pkl'
 
 def load_proj_df(start_year, end_year, verbose=0):
     """
@@ -646,7 +644,6 @@ def train_test_split_along_time(data, target, year):
 def get_train_valid_test_data(run_type, columns=None):
     if run_type == 'dev': file_train, file_test = DF_DEV_TRAIN_PATH, DF_DEV_TEST_PATH
     if run_type == 'prd': file_train, file_test = DF_PRD_TRAIN_PATH, DF_PRD_TEST_PATH
-    if run_type == 'gpu': file_train, file_test = DF_GPU_TRAIN_PATH, DF_GPU_TEST_PATH
 
     df_train, df_test = pd.read_pickle(f'./{file_train}'), pd.read_pickle(f'./{file_test}')
 
