@@ -20,32 +20,33 @@ def load_proj_df(start_year, end_year, verbose=0):
     :param verbose:    if 1 the execution is verbose
     """
     df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, verbose)
-    if verbose:
-        display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
+    if verbose: display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
 
-        # rmv col related to geographical info
-        df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], verbose)
-        # rmv col not known before the accident
-        df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], verbose)
+    # rmv col related to geographical info
+    df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], verbose)
+    # rmv col not known before the accident
+    df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], verbose)
 
-        df = rmv_col_too_much_null(df, 0.08, verbose)
-        df = clean_categ_not_specified(df)
-        df = drop_lines_with_null(df, verbose)
-        df = create_age(df)
-        df = create_age_cls(df)
-        df = clean_col_dep(df, True)
-        df = clean_nbv(df)
-        df = clean_actp(df)
-        df = clean_catv(df)
-        df = clean_hrmn(df)
-        df = create_datetime(df)
-        df = create_joursem(df)
-        df = create_grav_lbl(df)
-        df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
-        df = encode_grav(df, verbose)
-        df = set_target_first_column(df, verbose)
+    df = rmv_col_too_much_null(df, 0.08, verbose)
+    df = clean_categ_not_specified(df)
+    df = drop_lines_with_null(df, verbose)
+    df = create_age(df)
+    df = create_age_cls(df)
+    df = clean_col_dep(df, True)
+    df = clean_nbv(df)
+    df = clean_actp(df)
+    df = clean_catv(df)
+    df = clean_catu(df)
+    df = clean_circ(df)
+    df = clean_hrmn(df)
+    df = create_datetime(df)
+    df = create_joursem(df)
+    df = create_grav_lbl(df)
+    df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
+    df = encode_grav(df, verbose)
+    df = set_target_first_column(df, verbose)
 
-        if verbose: df.info(verbose=True, show_counts=True)
+    if verbose: df.info(verbose=True, show_counts=True)
 
     return df
 
@@ -540,6 +541,16 @@ def clean_catv(df):
 
     return df
 
+def clean_catu(df):
+    df['catu'] = df['catu'].replace(to_replace=[4], value=[-1])
+
+    return df
+
+def clean_circ(df):
+    df['circ'] = df['circ'].replace(to_replace=[0], value=[-1])
+
+    return df
+
 
 def clean_senc(df):
     df.senc = df.senc.replace(to_replace=[0, 3], value=-1)
@@ -663,7 +674,7 @@ def get_data_resampled(X, y, verbose=0):
     start_time = time.time()
     X_rs, y_rs = sampler.fit_resample(X, y)
     if 'actp' in X.columns: X_rs['actp'] = X_rs['actp'].astype('int')
-    if 'dep' in X.columns: X_rs['dep'] = X_rs['dep'].astype('int')
+    if 'dep'  in X.columns: X_rs['dep']  = X_rs['dep'].astype('int')
 
     if verbose:
         print(f"--- Smote applied in %s seconds ---" % (time.time() - start_time))
@@ -673,3 +684,12 @@ def get_data_resampled(X, y, verbose=0):
         print(f"y shape : {y.shape} -> {y_rs.shape}")
 
     return X_rs, y_rs
+
+def plot_data_augmentation(y, y_rs):
+    s_1 = [len(y[y==1]), len(y_rs[y_rs==1])]
+    s_0 = [len(y[y==0]), len(y_rs[y_rs==0])]
+
+    df_tmp = pd.DataFrame({'Classe 1':s_1, 'Classe 0':s_0}, index=['Original', 'Après SMOTE'])
+    df_tmp.plot(kind='bar', stacked=True, color=['teal', 'powderblue'],
+                      title="Compositions du dataset avant et après application de SMOTE",
+                      rot=0);
