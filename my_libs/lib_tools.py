@@ -198,17 +198,6 @@ def load_vehicules(start_year, end_year):
 
 
 # DATA PRE-PROCESSING --------------------------------------------
-def get_cl_age(age):
-    if age <= 25:
-        return '0-25'
-    if 25 < age <= 37:
-        return '26-37'
-    if 37 < age <= 53:
-        return '38-53'
-    if 53 < age:
-        return '>53'
-
-
 def preproc_usagers(dic_usagers, verbose):
     df_usagers = concat_df_from_dict(dic_usagers, verbose)
     df_usagers = manage_duplicated(df_usagers, verbose)
@@ -244,7 +233,7 @@ def preproc_lieux(dic_lieux, verbose):
 
 def concat_df_from_dict(dic, verbose):
     """
-    Concatenates all DataFrames contained in dic in one sigle DataFrame
+    Concatenates all DataFrames contained in dic in one single DataFrame
     :param dic: A dictionary with key value pairs like dic[year] = dataframe
     :param verbose: 1 to display information message
     :return: a DataFrame fed consistenly with all data from dic
@@ -442,7 +431,7 @@ def create_joursem(df):
 def clean_col_dep(df, verbose):
     if verbose: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
-    df['dep'] = [clean_dep(dep) for dep in df.dep]
+    df['dep'] = [get_dep_code(dep) for dep in df.dep]
 
     if verbose: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
@@ -450,9 +439,12 @@ def clean_col_dep(df, verbose):
 
 
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
+    """"
+    Merges the 4 dataframes in input into a single one
+    """
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
-    df = df.merge(on='Num_Acc', right=df_lieux, how='left')
+    df = df.merge(on='Num_Acc',   right=df_lieux,  how='left')
     if 'id_vehicule' in df_vehic.columns:
         df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
     else:
@@ -482,46 +474,16 @@ def get_work_df(start_year, end_year, sample_size=None, verbose=0):
 
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
 
-
-def dep_codes_get():
-    """
-    source : https://fr.wikipedia.org/wiki/Num%C3%A9rotation_des_d%C3%A9partements_fran%C3%A7ais
-    """
-    dep_lst = []
-    for k in range(1, 96):
-        s = str(k)
-        if len(s) == 1: s = "0" + s
-        dep_lst.append(s)
-
-    for k in range(971, 979):
-        dep_lst.append(str(k))
-
-    dep_lst.append('984')  # Terres Australes et Antarctiques Françaises
-    dep_lst.append('986')  # Wallis et Fotuna
-    dep_lst.append('987')  # Polynésie Française
-    dep_lst.append('988')  # Nouvelle-Calédonie
-    dep_lst.append('989')  # Ile de Clipperton
-
-    dep_lst.append('2A')  # Corse-du-Sud
-    dep_lst.append('2B')  # Haute-Corse
-    dep_lst.append('69D')  # Rhône
-    dep_lst.append('69M')  # Métropole de Lyon
-
-    dep_lst.remove('20')
-
-    return dep_lst
-
-
-def clean_dep(dep):
-    dep_clean = dep
+def get_dep_code(dep):
+    dep_code = dep
     if len(dep) == 1:
-        dep_clean = "0" + dep
+        dep_code = "0" + dep
     if len(dep) == 3 and dep[-1] == "0":
         dep_clean = dep[0:2]
-    if (dep == '201') or (dep == '2A'): dep_clean = '20'
-    if (dep == '202') or (dep == '2B'): dep_clean = '20'
+    if (dep == '201') or (dep == '2A'): dep_code = '20'
+    if (dep == '202') or (dep == '2B'): dep_code = '20'
 
-    return dep_clean
+    return dep_code
 
 
 def clean_nbv(df):
@@ -585,7 +547,7 @@ def drop_columns_from_df(df, columns, verbose):
     if verbose:
         for col in columns:
             if not (col in df.columns):
-                print(f"Column {col} correctly dropped from DataFrame")
+                print(f"Colonne {col} supprimée")
 
     return df
 
@@ -620,10 +582,10 @@ def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start
             df_tmp = dic_data[year]
             nb_lin.append(df_tmp.shape[0])
             nb_col.append(df_tmp.shape[1])
-            print(f'{key} {year} : {df_tmp.shape[1]} colonnes x {df_tmp.shape[0]} lignes')
+            print(f'{key} {year} : {df_tmp.shape[0]} lignes x {df_tmp.shape[1]} colonnes')
 
         print(f"\nnombre de lignes min : {min(nb_lin)}")
-        print(f"nombre de lignes max : {max(nb_lin)}")
+        print(f"nombre de lignes max : {max(nb_lin)}\n")
 
 
 def encode_dummies_col(df, col, verbose):
