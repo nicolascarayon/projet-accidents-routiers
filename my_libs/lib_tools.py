@@ -7,9 +7,10 @@ from imblearn.over_sampling import SMOTEN
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 
 DF_DEV_TRAIN_PATH = 'pickles/df-dev-train.pkl'
-DF_DEV_TEST_PATH  = 'pickles/df-dev-test.pkl'
+DF_DEV_TEST_PATH = 'pickles/df-dev-test.pkl'
 DF_PRD_TRAIN_PATH = 'pickles/df-prd-train.pkl'
-DF_PRD_TEST_PATH  = 'pickles/df-prd-test.pkl'
+DF_PRD_TEST_PATH = 'pickles/df-prd-test.pkl'
+
 
 def load_proj_df(start_year, end_year, verbose=0):
     """
@@ -42,7 +43,9 @@ def load_proj_df(start_year, end_year, verbose=0):
     df = create_datetime(df)
     df = create_joursem(df)
     df = create_grav_lbl(df)
-    df = drop_columns_from_df(df, ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'], verbose)
+    df = drop_columns_from_df(df,
+                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'],
+                              verbose)
     df = encode_grav(df, verbose)
     df = set_target_first_column(df, verbose)
 
@@ -284,19 +287,6 @@ def clean_categ_not_specified(df):
     return df
 
 
-def replace_null_mode(df, verbose):
-    cols = df.columns[df.isnull().any()]
-    k = 0
-    for col in cols:
-        mode = df[col].mode()[0]
-        df = df.fillna(mode)
-        # df_all = df_all.fillna(df_all[col].value_counts().index[0])  # faster than mode()[0]
-        k += 1
-        if verbose: print(f"{col}\t-> ok (nan replaced with {mode}) \t- {len(cols) - k} columns remaining...")
-
-    return df
-
-
 def rmv_col_too_much_null(df, threshold, verbose):
     rate_missing = df.isnull().sum() / len(df)
     df_miss = pd.DataFrame({'column_name': df.columns, 'rate_missing': rate_missing})
@@ -343,15 +333,6 @@ def chk_concat(dic, df):
 
     print(f"somme des lignes 'dic': {nb_lines}")
     print(f"nombre de lignes 'df' : {df.shape[0]}")
-
-
-def rmv_outliers(column, df):
-    if column == "an_nais":
-        df = df.drop(df[(df.an_nais == 1)].index)
-    if column == "age":
-        df = df.drop(df[(df.age > 120)].index)
-
-    return df
 
 
 def proc_usagers_secu(dic_usagers):
@@ -444,7 +425,7 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     """
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
-    df = df.merge(on='Num_Acc',   right=df_lieux,  how='left')
+    df = df.merge(on='Num_Acc', right=df_lieux, how='left')
     if 'id_vehicule' in df_vehic.columns:
         df = df.merge(on=['Num_Acc', 'id_vehicule', 'num_veh'], right=df_vehic, how='left')
     else:
@@ -473,6 +454,7 @@ def get_work_df(start_year, end_year, sample_size=None, verbose=0):
     df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
 
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
+
 
 def get_dep_code(dep):
     dep_code = dep
@@ -503,10 +485,12 @@ def clean_catv(df):
 
     return df
 
+
 def clean_catu(df):
     df['catu'] = df['catu'].replace(to_replace=[4], value=[-1])
 
     return df
+
 
 def clean_circ(df):
     df['circ'] = df['circ'].replace(to_replace=[0], value=[-1])
@@ -630,13 +614,14 @@ def get_train_valid_test_data(run_type, columns=None):
 
     return X_train, y_train, X_valid, y_valid, X_test, y_test
 
+
 def get_data_resampled(X, y, verbose=0):
     sampler = SMOTEN(sampling_strategy='auto', k_neighbors=5, n_jobs=-1)
 
     start_time = time.time()
     X_rs, y_rs = sampler.fit_resample(X, y)
     if 'actp' in X.columns: X_rs['actp'] = X_rs['actp'].astype('int')
-    if 'dep'  in X.columns: X_rs['dep']  = X_rs['dep'].astype('int')
+    if 'dep' in X.columns: X_rs['dep'] = X_rs['dep'].astype('int')
 
     if verbose:
         print(f"--- Smote applied in %s seconds ---" % (time.time() - start_time))
@@ -647,11 +632,12 @@ def get_data_resampled(X, y, verbose=0):
 
     return X_rs, y_rs
 
-def plot_data_augmentation(y, y_rs):
-    s_1 = [len(y[y==1]), len(y_rs[y_rs==1])]
-    s_0 = [len(y[y==0]), len(y_rs[y_rs==0])]
 
-    df_tmp = pd.DataFrame({'Classe 1':s_1, 'Classe 0':s_0}, index=['Original', 'Après SMOTE'])
+def plot_data_augmentation(y, y_rs):
+    s_1 = [len(y[y == 1]), len(y_rs[y_rs == 1])]
+    s_0 = [len(y[y == 0]), len(y_rs[y_rs == 0])]
+
+    df_tmp = pd.DataFrame({'Classe 1': s_1, 'Classe 0': s_0}, index=['Original', 'Après SMOTE'])
     df_tmp.plot(kind='bar', stacked=True, color=['teal', 'powderblue'],
-                      title="Compositions du dataset avant et après application de SMOTE",
-                      rot=0);
+                title="Compositions du dataset avant et après application de SMOTE",
+                rot=0);
