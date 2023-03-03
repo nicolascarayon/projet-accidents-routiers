@@ -433,7 +433,7 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     return df
 
 
-def get_work_df(start_year, end_year, sample_size=None, verbose=0):
+def get_work_df(start_year, end_year, verbose=0):
     # load data into dictionnaries
     dic_usagers = load_usagers(start_year, end_year)
     dic_caract = load_caract(start_year, end_year)
