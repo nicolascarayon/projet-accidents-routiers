@@ -1,50 +1,55 @@
 import pandas as pd
 import numpy as np
-from category_encoders import TargetEncoder
-from sklearn.preprocessing import OneHotEncoder
+import time
+from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTEN
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
-DIR_DATA_KAGG = ".\\data\\kaggle\\"
-def generate_pickle(df, filename):
-    df.to_pickle(f"./{filename}")
+
+DF_DEV_TRAIN_PATH = 'pickles/df-dev-train.pkl'
+DF_DEV_TEST_PATH = 'pickles/df-dev-test.pkl'
+DF_PRD_TRAIN_PATH = 'pickles/df-prd-train.pkl'
+DF_PRD_TEST_PATH = 'pickles/df-prd-test.pkl'
 
 
-def load_proj_df(start_year, end_year, chk=False):
-    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, chk)
-    if chk:
-        display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
+def load_proj_df(start_year, end_year, verbose=0):
+    """
+    Returns into a DataFrame the data on the period [start_year, end_year]
 
-        # rmv col related to geographical info
-        df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], chk)
-        # rmv col not known before the accident
-        df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], chk)
+    :param start_year: year defining the lower bound of the period
+    :param end_year:   year defining the higher bound of the period
+    :param verbose:    if 1 the execution is verbose
+    """
+    df, dic_usagers, dic_caract, dic_lieux, dic_vehic = get_work_df(start_year, end_year, verbose)
+    if verbose: display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start_year, end_year)
 
-        df = rmv_col_too_much_null(df, 0.08, chk)
-        df = clean_categ_not_specified(df)
-        df = drop_lines_with_null(df, chk)
-        df = create_age(df)
-        df = create_age_cls(df)
-        df = clean_col_dep(df, True)
-        df = clean_nbv(df)
-        df = clean_actp(df)
-        df = clean_catv(df)
-        df = clean_hrmn(df)
-        df = create_datetime(df)
-        df = create_joursem(df)
-        df = create_grav_lbl(df)
-        df = drop_columns_from_df(df, ['an_nais'], chk)
-        df = drop_columns_from_df(df, ['age'], chk)
-        df = drop_columns_from_df(df, ['grav_lbl'], chk)    # drop column used only for data pre-analysis
-        df = drop_columns_from_df(df, ['Num_Acc'], chk)
-        df = drop_columns_from_df(df, ['datetime'], chk)
-        df = drop_columns_from_df(df, ['an'], chk)
-        df = drop_columns_from_df(df, ['num_veh'], chk)
-        df = drop_columns_from_df(df, ['jour'], chk)
-        df = drop_columns_from_df(df, ['hrmn'], chk)
-        df = encode_grav(df, chk)
-        df = set_target_first_column(df, chk)
+    # rmv col related to geographical info
+    df = drop_columns_from_df(df, ['com', 'adr', 'lat', 'long', 'pr', 'pr1'], verbose)
+    # rmv col not known before the accident
+    df = drop_columns_from_df(df, ['obs', 'obsm', 'choc', 'manv'], verbose)
 
-        if chk: df.info(verbose=True, show_counts=True)
+    df = rmv_col_too_much_null(df, 0.08, verbose)
+    df = clean_categ_not_specified(df)
+    df = drop_lines_with_null(df, verbose)
+    df = create_age(df)
+    df = create_age_cls(df)
+    df = clean_col_dep(df, True)
+    df = clean_nbv(df)
+    df = clean_actp(df)
+    df = clean_catv(df)
+    df = clean_catu(df)
+    df = clean_circ(df)
+    df = clean_hrmn(df)
+    df = create_datetime(df)
+    df = create_joursem(df)
+    df = create_grav_lbl(df)
+    df = drop_columns_from_df(df,
+                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'],
+                              verbose)
+    df = encode_grav(df, verbose)
+    df = set_target_first_column(df, verbose)
+
+    if verbose: df.info(verbose=True, show_counts=True)
 
     return df
 
@@ -195,251 +200,17 @@ def load_vehicules(start_year, end_year):
     return vehic
 
 
-def load_data_kagg():
-    """Retourne les données dans un dictionnaire de DataFrames dont la clé est le type de donnée
-
-    ex : my_dict = load_data_kagg(my_folder)
-    les données des usagers sont accessibles via la clé 'usagers' : df_usagers = my_dict['usagers']
-    les clés disponibles sont :
-     - 'caracts'
-     - 'lieux'
-     - 'usagers'
-     - 'vacances'
-     - 'vehics'
-    """
-    data_dict = {'caract': pd.read_csv(DIR_DATA_KAGG + 'caracteristics.csv', sep=',', encoding='ISO-8859-1'),
-                 'lieux': pd.read_csv(DIR_DATA_KAGG + 'places.csv', sep=','),
-                 'usagers': pd.read_csv(DIR_DATA_KAGG + 'users.csv', sep=','),
-                 'vacances': pd.read_csv(DIR_DATA_KAGG + 'holidays.csv', sep=','),
-                 'vehic': pd.read_csv(DIR_DATA_KAGG + 'vehicles.csv', sep=',')
-                 }
-    return data_dict
-
-
-def get_labels(varname, value):
-    if varname == 'lum':
-        if value == 1:
-            return 'Plein jour'
-        if value == 2:
-            return 'Crépuscule ou aube'
-        if value == 3:
-            return 'Nuit sans éclairage public'
-        if value == 4:
-            return 'Nuit avec éclairage public non allumé'
-        if value == 5:
-            return 'Nuit avec éclairage public allumé'
-
-    if varname == 'grav':
-        if value == 1:
-            return 'Indemne'
-        if value == 2:
-            return 'Tué'
-        if value == 3:
-            return 'Blessé hospitalisé'
-        if value == 4:
-            return 'Blessé léger'
-
-    if varname == 'catu':
-        if value == 1:
-            return 'Conducteur'
-        if value == 2:
-            return 'Passager'
-        if value == 3:
-            return 'Piéton'
-
-    if varname == 'sexe':
-        if value == 1:
-            return 'Masculin'
-        if value == 2:
-            return 'Féminin'
-
-    if varname == 'agg':
-        if value == 1:
-            return 'hors agglomération'
-        if value == 2:
-            return 'en agglomération'
-
-    if varname == 'int':
-        if value == 1:
-            return 'Hors intersection'
-        if value == 2:
-            return 'Intersection en X'
-        if value == 3:
-            return 'Intersection en T'
-        if value == 4:
-            return 'Intersection en Y'
-        if value == 5:
-            return 'Intersection à plus de 4 branches'
-        if value == 6:
-            return 'Giratoire'
-        if value == 7:
-            return 'Place'
-        if value == 8:
-            return 'Passage à niveau'
-        if value == 9:
-            return 'Autre intersection'
-
-    if varname == 'atm':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '1':
-            return 'Normale'
-        if value == '2':
-            return 'Pluie légère'
-        if value == '3':
-            return 'Pluie forte'
-        if value == '4':
-            return 'Neige - grêle'
-        if value == '5':
-            return 'Brouillard - fumée'
-        if value == '6':
-            return 'Vent fort - tempête'
-        if value == '7':
-            return 'Temps éblouissant'
-        if value == '8':
-            return 'Temps couvert'
-        if value == '9':
-            return 'Autre'
-
-    if varname == 'col':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '1':
-            return 'Deux véhicules - frontale'
-        if value == '2':
-            return "Deux véhicules - par l'arrière"
-        if value == '3':
-            return 'Deux véhicules - par le côté'
-        if value == '4':
-            return 'Trois véhicules et plus - en chaîne'
-        if value == '5':
-            return 'Trois véhicules et plus - collisions multiples'
-        if value == '6':
-            return 'Autre collision'
-        if value == '7':
-            return 'Sans collision'
-
-    if varname == 'trajet':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '0':
-            return 'Non renseigné'
-        if value == '1':
-            return 'Domicile - travail'
-        if value == '2':
-            return 'Domicile - école'
-        if value == '3':
-            return 'Courses - achats'
-        if value == '4':
-            return 'Utilisation professionnelle'
-        if value == '5':
-            return 'Promende - loisirs'
-        if value == '9':
-            return 'Autre'
-
-    if (varname == 'secu1') or (varname == 'secu2') or (varname == 'secu3'):
-        if value == -1:
-            return 'Non renseigné'
-        if value == 0:
-            return 'Aucun équipement'
-        if value == 1:
-            return 'Ceinture'
-        if value == 2:
-            return 'Casque'
-        if value == 3:
-            return 'Dispositif enfants'
-        if value == 4:
-            return 'Gilet réfléchissant'
-        if value == 5:
-            return 'Airbag (2RM/3RM)'
-        if value == 6:
-            return 'Gants (2RM/3RM)'
-        if value == 7:
-            return 'Non déterminable'
-        if value == 8:
-            return 'Autre'
-
-    if varname == 'locp':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '0':
-            return 'Sans objet'
-        if value == '1':
-            return 'Sur chaussée - A +50 du pass piéton'
-        if value == '2':
-            return 'Sur chaussée - A -50 du pass piéton'
-        if value == '3':
-            return 'Sur pass piéton - Sans signalisation lumineuse'
-        if value == '4':
-            return 'Sur pass piéton - Avec signalisation lumineuse'
-        if value == '5':
-            return 'Sur trottoir'
-        if value == '6':
-            return 'Sur accotement'
-        if value == '7':
-            return 'Sur refuge ou BAU'
-        if value == '8':
-            return 'Sur contre allée'
-        if value == '9':
-            return 'Inconnue'
-
-    if varname == 'actp':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '0':
-            return 'Se déplaçant - Non renseigné ou sans objet'
-        if value == '1':
-            return 'Se déplaçant - Sens véhicule ou heurtant'
-        if value == '2':
-            return 'Se déplaçant - Sens inverse du véhicule'
-        if value == '3':
-            return 'Traversant'
-        if value == '4':
-            return 'Masqué'
-        if value == '5':
-            return 'Jouant - courant'
-        if value == '6':
-            return 'Avec animal'
-        if value == '9':
-            return 'Autre'
-        if value == 'A':
-            return 'Monte/descend du véhicule'
-        if value == 'B':
-            return 'Inconnue'
-
-    if varname == 'etatp':
-        if value == '-1':
-            return 'Non renseigné'
-        if value == '1':
-            return 'Seul'
-        if value == '2':
-            return 'Accompagné'
-        if value == '3':
-            return 'En groupe'
-
-
 # DATA PRE-PROCESSING --------------------------------------------
-def get_cl_age(age):
-    if age <= 25:
-        return '0-25'
-    if 25 < age <= 37:
-        return '26-37'
-    if 37 < age <= 53:
-        return '38-53'
-    if 53 < age:
-        return '>53'
-
-
-def preproc_usagers(dic_usagers, chk):
-    df_usagers = concat_df_from_dict(dic_usagers, chk)
-    df_usagers = manage_duplicated(df_usagers, chk)
+def preproc_usagers(dic_usagers, verbose):
+    df_usagers = concat_df_from_dict(dic_usagers, verbose)
+    df_usagers = manage_duplicated(df_usagers, verbose)
 
     return df_usagers
 
 
-def preproc_caract(dic_caract, chk):
-    df_caract = concat_df_from_dict(dic_caract, chk)
-    df_caract = manage_duplicated(df_caract, chk)
+def preproc_caract(dic_caract, verbose):
+    df_caract = concat_df_from_dict(dic_caract, verbose)
+    df_caract = manage_duplicated(df_caract, verbose)
     df_caract['an'] = df_caract['an'].replace(
         to_replace=[5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
         value=[2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
@@ -448,22 +219,28 @@ def preproc_caract(dic_caract, chk):
     return df_caract
 
 
-def preproc_vehic(dic_vehic, chk):
-    df_vehic = concat_df_from_dict(dic_vehic, chk)
-    df_vehic = manage_duplicated(df_vehic, chk)
-    df_vehic = manage_vehic_duplicated(df_vehic, chk)
+def preproc_vehic(dic_vehic, verbose):
+    df_vehic = concat_df_from_dict(dic_vehic, verbose)
+    df_vehic = manage_duplicated(df_vehic, verbose)
+    df_vehic = manage_vehic_duplicated(df_vehic, verbose)
 
     return df_vehic
 
 
-def preproc_lieux(dic_lieux, chk):
-    df_lieux = concat_df_from_dict(dic_lieux, chk)
-    df_lieux = manage_duplicated(df_lieux, chk)
+def preproc_lieux(dic_lieux, verbose):
+    df_lieux = concat_df_from_dict(dic_lieux, verbose)
+    df_lieux = manage_duplicated(df_lieux, verbose)
 
     return df_lieux
 
 
-def concat_df_from_dict(dic, chk):
+def concat_df_from_dict(dic, verbose):
+    """
+    Concatenates all DataFrames contained in dic in one single DataFrame
+    :param dic: A dictionary with key value pairs like dic[year] = dataframe
+    :param verbose: 1 to display information message
+    :return: a DataFrame fed consistenly with all data from dic
+    """
     [start_year, end_year] = get_start_end_years_from_dic(dic)
     for year in dic.keys():
         df = dic[year]
@@ -471,26 +248,36 @@ def concat_df_from_dict(dic, chk):
             df_final = df
         else:
             df_final = pd.concat([df_final, df], ignore_index=True, axis=0)
-    if chk:
+    if verbose:
         chk_concat(dic, df_final)
     return df_final
 
 
-def manage_duplicated(df, chk):
-    if chk: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
+def manage_duplicated(df, verbose):
+    """
+    Removes the duplicates in df
+    :param df: the DataFrame
+    :param verbose: 1 to display information
+    :return: the df with no duplicate
+    """
+    if verbose: print(f"nombre de doublons avant traîtement : {df.duplicated().sum()}")
     df = df.drop_duplicates()
-    if chk: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
+    if verbose: print(f"nombre de doublons après traîtement : {df.duplicated().sum()}")
 
-    return df
-
-
-def manage_not_specified(df):
-    df = df.replace(to_replace=['-1', ' -1'], value='-1')
     return df
 
 
 def clean_categ_not_specified(df):
-    col_minusone = get_col_minusone_allowed()
+    """
+    Replaces in df the nan by -1 in columns where -1 is allowed
+    :param df: the dataframe to be updated
+    :return: the dataframe with non replaced by -1
+    """
+    col_minusone = ['place', 'catu', 'grav', 'sexe', 'trajet', 'secu', 'locp', 'actp',
+                    'etatp', 'secu1', 'secu2', 'secu3', 'lum', 'agg', 'int', 'atm',
+                    'col', 'catr', 'circ', 'nbv', 'vosp', 'prof', 'plan', 'lartpc',
+                    'larrout', 'surf', 'infra', 'situ', 'env1', 'vma', 'senc', 'catv',
+                    'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
     col_to_chk = []
     for col in col_minusone:
         if col in df.columns:
@@ -500,50 +287,29 @@ def clean_categ_not_specified(df):
     return df
 
 
-def get_col_minusone_allowed():
-    return ['place', 'catu', 'grav', 'sexe', 'trajet', 'secu', 'locp', 'actp',
-            'etatp', 'secu1', 'secu2', 'secu3', 'lum', 'agg', 'int', 'atm',
-            'col', 'catr', 'circ', 'nbv', 'vosp', 'prof', 'plan', 'lartpc',
-            'larrout', 'surf', 'infra', 'situ', 'env1', 'vma', 'senc', 'catv',
-            'occutc', 'obs', 'obsm', 'choc', 'manv', 'motor']
-
-
-def replace_null_mode(df, chk):
-    cols = df.columns[df.isnull().any()]
-    k = 0
-    for col in cols:
-        mode = df[col].mode()[0]
-        df = df.fillna(mode)
-        # df_all = df_all.fillna(df_all[col].value_counts().index[0])  # faster than mode()[0]
-        k += 1
-        if chk: print(f"{col}\t-> ok (nan replaced with {mode}) \t- {len(cols) - k} columns remaining...")
-
-    return df
-
-
-def rmv_col_too_much_null(df, threshold, chk):
+def rmv_col_too_much_null(df, threshold, verbose):
     rate_missing = df.isnull().sum() / len(df)
     df_miss = pd.DataFrame({'column_name': df.columns, 'rate_missing': rate_missing})
     df_miss.sort_values('rate_missing', inplace=True, ascending=False)
     to_drop = df_miss[df_miss.rate_missing >= threshold]['column_name']
     df = df.drop(columns=to_drop.index, axis=1)
 
-    if chk:
+    if verbose:
         df_miss.rate_missing *= 100
         print(f"Colonnes supprimées : {to_drop.index}")
         print(f"\n{df_miss}")
     return df
 
 
-def manage_vehic_duplicated(df_vehic, chk):
-    if chk:
+def manage_vehic_duplicated(df_vehic, verbose):
+    if verbose:
         df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
         print(
             f"Véhicules en doublons vis à vis de la clé fonctionnelle avant traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
 
     df_vehic.drop_duplicates(['Num_Acc', 'num_veh'], keep='first', inplace=True)
 
-    if chk:
+    if verbose:
         df_vehic_dupl = df_vehic.duplicated(['Num_Acc', 'num_veh'])
         print(
             f"Véhicules en doublons vis à vis de la clé fonctionnelle après traitement : {df_vehic_dupl[df_vehic_dupl].sum()}")
@@ -567,15 +333,6 @@ def chk_concat(dic, df):
 
     print(f"somme des lignes 'dic': {nb_lines}")
     print(f"nombre de lignes 'df' : {df.shape[0]}")
-
-
-def rmv_outliers(column, df):
-    if column == "an_nais":
-        df = df.drop(df[(df.an_nais == 1)].index)
-    if column == "age":
-        df = df.drop(df[(df.age > 120)].index)
-
-    return df
 
 
 def proc_usagers_secu(dic_usagers):
@@ -609,14 +366,18 @@ def proc_caract_gps(dic_caract):
             df = df.drop(columns=['gps'], axis=1)
     return df
 
+
 def create_age(df):
     df['age'] = df['an'] - df['an_nais']
 
     return df
+
+
 def create_age_cls(df):
     # partially inspired from https://www.cerema.fr/system/files/documents/2017/11/rapport_classes_age_version_web_14032017_cle73f1e2.pdf
     # (Accidentalité et classes d'âge - Analyse des données 2011-2013 du fichier BAAC - Rapport de mars 2017
-    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min()-1, 15, 25, 45, 65, df['age'].max()], labels=[0, 1, 2, 3, 4])
+    df['age_cls'] = pd.cut(df['age'], bins=[df['age'].min() - 1, 15, 25, 45, 65, df['age'].max()],
+                           labels=[0, 1, 2, 3, 4])
 
     return df
 
@@ -648,17 +409,20 @@ def create_joursem(df):
     return df
 
 
-def clean_col_dep(df, chk):
-    if chk: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+def clean_col_dep(df, verbose):
+    if verbose: print(f"Départements avant nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
-    df['dep'] = [clean_dep(dep) for dep in df.dep]
+    df['dep'] = [get_dep_code(dep) for dep in df.dep]
 
-    if chk: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
+    if verbose: print(f"Départements après nettoyage : \n{df.sort_values(by='dep').dep.unique()}")
 
     return df
 
 
 def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
+    """"
+    Merges the 4 dataframes in input into a single one
+    """
     df = df_usagers
     df = df.merge(on=['Num_Acc'], right=df_caract, how='left')
     df = df.merge(on='Num_Acc', right=df_lieux, how='left')
@@ -669,7 +433,7 @@ def merge_dataframes(df_usagers, df_caract, df_vehic, df_lieux):
     return df
 
 
-def get_work_df(start_year, end_year, sample_size=None, chk=False):
+def get_work_df(start_year, end_year, sample_size=None, verbose=0):
     # load data into dictionnaries
     dic_usagers = load_usagers(start_year, end_year)
     dic_caract = load_caract(start_year, end_year)
@@ -677,14 +441,14 @@ def get_work_df(start_year, end_year, sample_size=None, chk=False):
     dic_lieux = load_lieux(start_year, end_year)
 
     # Preprocessings pour la construction de : df_usagers, df_caract, df_vehic, df_lieux
-    if chk: print(f"\nusagers :")
-    df_usagers = preproc_usagers(dic_usagers, chk)
-    if chk: print(f"\ncaractéristiques :")
-    df_caract = preproc_caract(dic_caract, chk)
-    if chk: print(f"\nvéhicules :")
-    df_vehic = preproc_vehic(dic_vehic, chk)
-    if chk: print(f"\nlieux :")
-    df_lieux = preproc_lieux(dic_lieux, chk)
+    if verbose: print(f"\nusagers :")
+    df_usagers = preproc_usagers(dic_usagers, verbose)
+    if verbose: print(f"\ncaractéristiques :")
+    df_caract = preproc_caract(dic_caract, verbose)
+    if verbose: print(f"\nvéhicules :")
+    df_vehic = preproc_vehic(dic_vehic, verbose)
+    if verbose: print(f"\nlieux :")
+    df_lieux = preproc_lieux(dic_lieux, verbose)
 
     # Merge dans un seul DataFrame
     df = merge_dataframes(df_usagers=df_usagers, df_caract=df_caract, df_vehic=df_vehic, df_lieux=df_lieux)
@@ -692,57 +456,44 @@ def get_work_df(start_year, end_year, sample_size=None, chk=False):
     return [df, dic_usagers, dic_caract, dic_lieux, dic_vehic]
 
 
-def dep_codes_get():
-    """
-    source : https://fr.wikipedia.org/wiki/Num%C3%A9rotation_des_d%C3%A9partements_fran%C3%A7ais
-    """
-    dep_lst = []
-    for k in range(1, 96):
-        s = str(k)
-        if len(s) == 1: s = "0" + s
-        dep_lst.append(s)
-
-    for k in range(971, 979):
-        dep_lst.append(str(k))
-
-    dep_lst.append('984')  # Terres Australes et Antarctiques Françaises
-    dep_lst.append('986')  # Wallis et Fotuna
-    dep_lst.append('987')  # Polynésie Française
-    dep_lst.append('988')  # Nouvelle-Calédonie
-    dep_lst.append('989')  # Ile de Clipperton
-
-    dep_lst.append('2A')  # Corse-du-Sud
-    dep_lst.append('2B')  # Haute-Corse
-    dep_lst.append('69D')  # Rhône
-    dep_lst.append('69M')  # Métropole de Lyon
-
-    dep_lst.remove('20')
-
-    return dep_lst
-
-
-def clean_dep(dep):
-    dep_clean = dep
+def get_dep_code(dep):
+    dep_code = dep
     if len(dep) == 1:
-        dep_clean = "0" + dep
+        dep_code = "0" + dep
     if len(dep) == 3 and dep[-1] == "0":
         dep_clean = dep[0:2]
-    if (dep == '201') or (dep == '2A'): dep_clean = '20'
-    if (dep == '202') or (dep == '2B'): dep_clean = '20'
+    if (dep == '201') or (dep == '2A'): dep_code = '20'
+    if (dep == '202') or (dep == '2B'): dep_code = '20'
 
-    return dep_clean
+    return dep_code
+
 
 def clean_nbv(df):
     df['nbv'] = [-1 if nbv > 6 else nbv for nbv in df.nbv]
 
     return df
 
+
 def clean_actp(df):
     df.actp = df.actp.replace(to_replace=[' -1', 'A', 'B'], value=[-1, 10, 11])
 
     return df
+
+
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
+
+    return df
+
+
+def clean_catu(df):
+    df['catu'] = df['catu'].replace(to_replace=[4], value=[-1])
+
+    return df
+
+
+def clean_circ(df):
+    df['circ'] = df['circ'].replace(to_replace=[0], value=[-1])
 
     return df
 
@@ -759,13 +510,13 @@ def clean_hrmn(df):
     return df
 
 
-def drop_lines_with_null(df, chk):
-    if chk:
+def drop_lines_with_null(df, verbose):
+    if verbose:
         print("Suppression des lignes avec Null : ")
         nb_bef = df.shape[0]
         print(f"Nombre de lignes avant : {nb_bef}")
     df = df.dropna(axis=0, how='any')
-    if chk:
+    if verbose:
         nb_aft = df.shape[0]
         print(f"Nombre de lignes après : {nb_aft}")
         print(f"Taux de perte : {(nb_bef - nb_aft) / nb_aft * 100:.2f} %")
@@ -773,14 +524,14 @@ def drop_lines_with_null(df, chk):
     return df
 
 
-def drop_columns_from_df(df, columns, chk):
+def drop_columns_from_df(df, columns, verbose):
     for col in columns:
         if col in df.columns:
             df = df.drop(columns=col, axis=1)
-    if chk:
+    if verbose:
         for col in columns:
             if not (col in df.columns):
-                print(f"Column {col} correctly dropped from DataFrame")
+                print(f"Colonne {col} supprimée")
 
     return df
 
@@ -793,10 +544,10 @@ def get_hh_mn(chaine):
     if len(chaine) > 4: return chaine
 
 
-def set_target_first_column(df, chk):
+def set_target_first_column(df, verbose):
     col = df.pop("grav")
     df.insert(0, col.name, col)
-    if chk:
+    if verbose:
         print("'grav' has been set as first column")
         df.head()
     return df
@@ -815,32 +566,26 @@ def display_stats_data_load(dic_usagers, dic_caract, dic_lieux, dic_vehic, start
             df_tmp = dic_data[year]
             nb_lin.append(df_tmp.shape[0])
             nb_col.append(df_tmp.shape[1])
-            print(f'{key} {year} : {df_tmp.shape[1]} colonnes x {df_tmp.shape[0]} lignes')
+            print(f'{key} {year} : {df_tmp.shape[0]} lignes x {df_tmp.shape[1]} colonnes')
 
         print(f"\nnombre de lignes min : {min(nb_lin)}")
-        print(f"nombre de lignes max : {max(nb_lin)}")
+        print(f"nombre de lignes max : {max(nb_lin)}\n")
 
 
-def encode_dummies_col(df, col, chk):
+def encode_dummies_col(df, col, verbose):
     df_encoded = df.join(pd.get_dummies(df[col], prefix=col))
     df_encoded = df_encoded.drop(columns=[col], axis=1)
-    if chk: print(f"Column {col} has been dummies encoded")
+    if verbose: print(f"Column {col} has been dummies encoded")
 
     return df_encoded
 
-def encode_target_col(df, col, target, chk):
-    encoder = TargetEncoder()
-    df[f"{col}"] = encoder.fit_transform(df[col].astype('str'), target)
-    # df = df.drop(columns=[col], axis=1)
-    if chk: print(f"Column {col} has been target encoded")
 
-    return df
-
-def encode_grav(df, chk):
+def encode_grav(df, verbose):
     df['grav'] = df['grav'].replace(to_replace=[[1, 4], [2, 3]], value=[0, 1]).astype('int')
-    if chk : print(f"column grav encoded into 2 classes")
+    if verbose: print(f"column grav encoded into 2 classes")
 
     return df
+
 
 def train_test_split_along_time(data, target, year):
     filter_train = data.an < year
@@ -852,21 +597,47 @@ def train_test_split_along_time(data, target, year):
 
     return X_train, y_train, X_test, y_test
 
-def get_train_valid_test_data(filename_train, filename_test, columns=None):
 
-    df_train = pd.read_pickle(f'./{filename_train}')
-    df_test  = pd.read_pickle(f'./{filename_test}')
+def get_train_valid_test_data(run_type, columns=None):
+    if run_type == 'dev': file_train, file_test = DF_DEV_TRAIN_PATH, DF_DEV_TEST_PATH
+    if run_type == 'prd': file_train, file_test = DF_PRD_TRAIN_PATH, DF_PRD_TEST_PATH
 
-    data_train = df_train.iloc[:, 1:]
-    target_train = df_train['grav']
-    if not (columns==None): data_train = data_train[columns]
+    df_train, df_test = pd.read_pickle(f'./{file_train}'), pd.read_pickle(f'./{file_test}')
 
-    data_test = df_test.iloc[:, 1:]
-    target_test = df_test['grav']
-    if not (columns==None): data_test = data_test[columns]
+    data_train, X_test = df_train.iloc[:, 1:], df_test.iloc[:, 1:]
 
-    from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
-    X_test_final, y_test_final = data_test, target_test
+    target_train, y_test = df_train['grav'], df_test['grav']
 
-    return X_train, y_train, X_test, y_test, X_test_final, y_test_final
+    if not (columns is None): data_train, X_test = data_train[columns], X_test[columns]
+
+    X_train, X_valid, y_train, y_valid, = train_test_split(data_train, target_train, test_size=0.2, random_state=222)
+
+    return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+
+def get_data_resampled(X, y, verbose=0):
+    sampler = SMOTEN(sampling_strategy='auto', k_neighbors=5, n_jobs=-1)
+
+    start_time = time.time()
+    X_rs, y_rs = sampler.fit_resample(X, y)
+    if 'actp' in X.columns: X_rs['actp'] = X_rs['actp'].astype('int')
+    if 'dep' in X.columns: X_rs['dep'] = X_rs['dep'].astype('int')
+
+    if verbose:
+        print(f"--- Smote applied in %s seconds ---" % (time.time() - start_time))
+        print("Classes cardinality after resampling :")
+        print(y_rs.value_counts())
+        print(f"X shape : {X.shape} -> {X_rs.shape}")
+        print(f"y shape : {y.shape} -> {y_rs.shape}")
+
+    return X_rs, y_rs
+
+
+def plot_data_augmentation(y, y_rs):
+    s_1 = [len(y[y == 1]), len(y_rs[y_rs == 1])]
+    s_0 = [len(y[y == 0]), len(y_rs[y_rs == 0])]
+
+    df_tmp = pd.DataFrame({'Classe 1': s_1, 'Classe 0': s_0}, index=['Original', 'Après SMOTE'])
+    df_tmp.plot(kind='bar', stacked=True, color=['teal', 'powderblue'],
+                title="Compositions du dataset avant et après application de SMOTE",
+                rot=0);

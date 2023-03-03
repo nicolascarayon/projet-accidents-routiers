@@ -1,5 +1,14 @@
 21/02/2023 - 18h15 :
-
+- Focus rapport + conclusions
+- Streamlit :
+    - sauver les modèles au format h5 et ne présenter que les prédicteurs sous Streamlit
+    - déroulé :
+        - présentation du contexte
+        - présentation de la data - Data Viz
+        - présentation du cycle de modélisation et du modèle choisi (Catboost)
+        - interprétabilité
+    - Présenter l'AUC des modéles (tracer la 1° diagonale)
+- prochain rdv prévu le 02/03 13:00-14:00
 ------------------------------------------------------------------------------------------------------------------------
 15/02/2023 - 13h00
 
