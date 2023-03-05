@@ -12,6 +12,8 @@
 - jupyter : https://jupyter.org/install
 - git : https://git-scm.com/downloads
 
+Projet développé avec Python 3.9.13
+
 ### Notebooks disponibles
 
 * **00-dataset-generation.ipynb** 
