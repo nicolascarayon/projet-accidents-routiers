@@ -32,8 +32,9 @@
 * **02.4-CatBoostClassifier.ipynb** : notebook consacré à l'élaboration du prédicteur à base de l'algorithme CatBoost
   
 ### Librairies nécessitant potentiellement une installation particulière :
-* shapash : https://github.com/MAIF/shapash) 
+* shapash : https://github.com/MAIF/shapash 
 * catboost : https://catboost.ai/ 
 * optuna : https://optuna.org/
 * imblearn : https://imbalanced-learn.org/stable/
+* category_encoders : https://pypi.org/project/category-encoders/
 
