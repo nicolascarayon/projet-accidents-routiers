@@ -3,6 +3,7 @@ shapash~=2.2.2
 shap~=0.41.0
 catboost~=1.1.1
 optuna~=3.1.0
+category-encoders~=2.5.1.post0
 imblearn~=0.0
 pandas~=1.4.4
 jupyter~=1.0.0
