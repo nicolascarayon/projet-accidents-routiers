@@ -1,4 +1,4 @@
-streamlit~=1.18.1
+streamlit~=1.19.0
 shapash~=2.2.2
 shap~=0.41.0
 catboost~=1.1.1
@@ -10,12 +10,9 @@ pandas~=1.4.4
 jupyter~=1.0.0
 pip~=22.2.2
 panel~=0.13.1
-dataclasses~=0.8
 attrs~=21.4.0
-zlib~=1.2.12
 pathlib~=1.0.1
 wheel~=0.37.1
-openssl~=1.1.1
 cryptography>=39.0.1
 pillow>=9.3.0
 docutils~=0.18.1
@@ -31,4 +28,4 @@ typing_extensions~=4.3.0
 cython~=0.29.32
 future~=0.18.2
 scikit-learn~=1.0.2
-numpy>=1.21.5
+daal==2021.4.0
