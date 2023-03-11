@@ -80,8 +80,8 @@ def load_caract(start_year, end_year):
     """
     caract = {}
     dic_types = {'Num_Acc': 'Int64', 'jour': 'Int64', 'mois': 'Int64', 'an': 'Int64', 'hrmn': 'str',
-                 'lum': 'Int64', 'dep': 'str', 'com': 'str', 'agg': 'Int64', 'int': 'Int64', 'atm': 'Int64',
-                 'col': 'Int64', 'adr': 'str', 'lat': 'str', 'long': 'str'}
+                 'lum': 'str', 'dep': 'str', 'com': 'str', 'agg': 'str', 'int': 'str', 'atm': 'str',
+                 'col': 'str', 'adr': 'str', 'lat': 'str', 'long': 'str'}
     for year in range(start_year, end_year + 1):
         car = '_' if 2005 <= year <= 2016 else '-'
         if year == 2009:
@@ -125,9 +125,9 @@ def load_lieux(start_year, end_year):
 
     """
     lieux = {}
-    dic_type = {'catr': 'Int64', 'voie': 'str', 'v1': 'str', 'v2': 'str', 'circ': 'Int64', 'nbv': 'Int64',
-                'vosp': 'Int64', 'prof': 'Int64', 'plan': 'Int64',
-                'lartpc': 'str', 'surf': 'Int64', 'infra': 'Int64', 'situ': 'Int64'}
+    dic_type = {'catr': 'str', 'voie': 'str', 'v1': 'str', 'v2': 'str', 'circ': 'str', 'nbv': 'Int64',
+                'vosp': 'str', 'prof': 'str', 'plan': 'str',
+                'lartpc': 'str', 'surf': 'str', 'infra': 'str', 'situ': 'str'}
     for year in range(start_year, end_year + 1):
         car = '_' if 2005 <= year <= 2016 else '-'
         sep = ',' if 2005 <= year <= 2018 else ';'
@@ -159,10 +159,10 @@ def load_usagers(start_year, end_year):
     etatp : etatp
     """
     usagers = {}
-    dic_types = {'place': 'Int64', 'catu': 'Int64', 'grav': 'Int64', 'sexe': 'Int64', 'an_nais': 'Int64',
-                 'trajet': 'Int64',
-                 'secu': 'str', 'secu1': 'Int64', 'secu2': 'Int64', 'secu3': 'Int64', 'locp': 'Int64', 'actp': 'str',
-                 'etatp': 'Int64'}
+    dic_types = {'place': 'str', 'catu': 'str', 'grav': 'str', 'sexe': 'str', 'an_nais': 'Int64',
+                 'trajet': 'str',
+                 'secu': 'str', 'secu1': 'str', 'secu2': 'str', 'secu3': 'str', 'locp': 'str', 'actp': 'str',
+                 'str': 'str'}
     for year in range(start_year, end_year + 1):
         car = '_' if 2005 <= year <= 2016 else '-'
         sep = ',' if 2005 <= year <= 2018 else ';'
@@ -190,8 +190,8 @@ def load_vehicules(start_year, end_year):
     occutc : nombre d’occupants dans le transport en commun
     """
     vehic = {}
-    dic_types = {'senc': 'Int64', 'catv': 'Int64', 'obs': 'Int64', 'obsm': 'Int64', 'choc': 'Int64', 'manv': 'Int64',
-                 'motor': 'Int64', 'occutc': 'Int64'}
+    dic_types = {'senc': 'str', 'catv': 'str', 'obs': 'str', 'obsm': 'str', 'choc': 'str', 'manv': 'str',
+                 'motor': 'str', 'occutc': 'str'}
     for year in range(start_year, end_year + 1):
         car = '_' if 2005 <= year <= 2016 else '-'
         sep = ',' if 2005 <= year <= 2018 else ';'
@@ -396,8 +396,9 @@ def create_datetime(df):
 
 
 def create_grav_lbl(df):
-    labels = ['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger']
-    df['grav_lbl'] = [labels[grav - 1] for grav in df.grav]
+    # labels = ['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger']
+    # df['grav_lbl'] = [labels[grav - 1] for grav in df.grav]
+    df['grav_lbl'] = df.grav.replace(to_replace=['1', '2', '3', '4'], value=['Indemne', 'Tué', 'Blessé hospitalisé', 'Blessé léger'])
 
     return df
 
@@ -581,7 +582,7 @@ def encode_dummies_col(df, col, verbose):
 
 
 def encode_grav(df, verbose):
-    df['grav'] = df['grav'].replace(to_replace=[[1, 4], [2, 3]], value=[0, 1]).astype('int')
+    df['grav'] = df['grav'].replace(to_replace=['1', '4', '2', '3'], value=['0', '0', '1', '1']).astype('int')
     if verbose: print(f"column grav encoded into 2 classes")
 
     return df
