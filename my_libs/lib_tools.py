@@ -44,7 +44,7 @@ def load_proj_df(start_year, end_year, verbose=0):
     df = create_joursem(df)
     df = create_grav_lbl(df)
     df = drop_columns_from_df(df,
-                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn'],
+                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn', 'senc'],
                               verbose)
     df = encode_grav(df, verbose)
     df = set_target_first_column(df, verbose)
