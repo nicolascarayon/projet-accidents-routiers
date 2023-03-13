@@ -24,8 +24,6 @@ df = pd.DataFrame({'col 1':[1,2,3,4,5], 'col 2':[2,3,4,5,6], 'col 3':[3,4,5,6,7]
 st.table(df)
 st.dataframe(df)
 
-st.image("./pics/Illustration-of-random-forest-trees.png", caption="Here's a random forest classifier", width=900)
-
 def change():
     print("Changed")
 
