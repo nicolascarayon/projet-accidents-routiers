@@ -30,8 +30,7 @@ with tab3:
     cols = st.columns(8)
     file_type = cols[0].selectbox(label="Type de fichier", options=('usagers', 'accidents', 'lieux', 'véhicules'))
     year_sel  = cols[1].selectbox(label="Année", options=range(2005, 2022))
-    print(file_type)
-    print(year_sel)
+
     with st.spinner('Wait for it...'):
         data_dic = utils.get_DataFrame(file_type, year_sel)
     df = data_dic[year_sel]
