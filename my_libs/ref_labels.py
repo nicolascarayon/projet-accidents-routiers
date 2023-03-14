@@ -105,8 +105,16 @@ dic_catv = {-1: 'Autres',
             30: 'Scooter <50cm3',
             33: 'Motocyclette >125cm3'}
 
-dic_lum = {'def': 'Condition de luminosité',
-           1: 'Plein jour',
+dic_catr = {1: 'Autoroute',
+            2: 'Route nationale',
+            3: 'Route départementale',
+            4: 'Voie communale',
+            5: 'Hors réseau public',
+            6: 'Parc de stationnement ouvert à la circulation publique',
+            7: 'Routes de métropole urbaine',
+            9: 'Autre'}
+
+dic_lum = {1: 'Plein jour',
            2: 'Crépuscule ou aube',
            3: 'Nuit sans éclairage public',
            4: 'Nuit avec éclairage public non allumé',
@@ -125,8 +133,7 @@ dic_sexe = {'def': 'Sexe',
             1: 'Masculin',
             2: 'Féminin'}
 
-dic_agg = {'def': 'Localisation',
-           1: 'Hors agglomération',
+dic_agg = {1: 'Hors agglomération',
            2: 'En agglomération'}
 
 dic_int = {'def': 'Intersection',
@@ -152,8 +159,7 @@ dic_atm = {'def': 'Conditions atmosphériques',
            8: 'Temps couvert',
            9: 'Autre'}
 
-dic_col = {'def': 'Type de collision',
-           -1: 'Non renseigné',
+dic_col = {-1: 'Non renseigné',
            1: 'Deux véhicules - frontale',
            2: "Deux véhicules - par l'arrière",
            3: 'Deux véhicules - par le côté',
@@ -240,6 +246,11 @@ dic_locp = {'def': 'Localisation du piéton',
             8: 'Sur contre allée',
             9: 'Inconnue'}
 
+def get_key_from_value(dict, val):
+    keys = [k for k, v in dict.items() if v == val]
+    if keys:
+        return keys[0]
+    return None
 
 def get_labels(varname, value):
     if varname == 'lum': return dic_lum[value]
