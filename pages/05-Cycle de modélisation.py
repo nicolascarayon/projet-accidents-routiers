@@ -64,6 +64,10 @@ with tab_rf:
 
 with tab_gb:
     comp.subheader("Gradient Boosting")
+    st.markdown("- ##### Principe proche du Random Forest, plusieurs classifieurs *faibles* sont combinés pour donner un classifieur fort")
+    st.markdown("- ##### l'entraînement des modèles simples se fait sur données aléatoires avec remise")
+    st.markdown("- ##### à chaque itération le modèle se concentre à améliorer la prédictions des erreurs du modèle de l'intération précédente")
+    st.markdown("- #### La fonction de coût est optimisée à chaque étape selon une descente de gradient")
 
     show_res_gb = st.checkbox("Résultats", key="chk_res_gb")
     if show_res_gb:
@@ -75,6 +79,9 @@ with tab_gb:
 
 with tab_cb:
     comp.header("CatBoost")
+    st.markdown("- ##### Algorithme de Gradient Boosting optimisé pour les jeux de données catégorielles")
+    st.markdown("- ##### Utilise une technique de régularisation pour éviter le sur-apprentissage (Overfitting Detector)")
+    st.markdown("- ##### Capable de traiter les valeurs manquantes directement sans preprocessing")
 
     show_res_cb = st.checkbox("Résultats", key="chk_res_cb")
     if show_res_cb:

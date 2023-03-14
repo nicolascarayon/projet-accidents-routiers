@@ -5,9 +5,9 @@ comp.sidebar_info()
 
 comp.header("Features processing")
 
-tab1, tab2, tab3 = st.tabs(["Données manquantes", "Relations gravité-variables", "Distributions  conditionnelles"])
+tab_trait, tab2 = st.tabs(["Traitements", "..."])
 
-with tab1:
+with tab_trait:
     comp.header("Traitements")
     st.markdown("- ##### Suppression des variables considérées inutiles vis à vis du problème (adresse postale, coord; GPS, etc...)")
     st.markdown("- ##### Suppression des variables avec trop de valeurs *Null*")
@@ -29,5 +29,5 @@ with tab1:
 with tab2:
     comp.header("tab2")
 
-with tab3:
-    comp.header("tab3")
+# with tab3:
+#     comp.header("tab3")
