@@ -1,6 +1,24 @@
 import pandas as pd
+import numpy as np
+from my_libs import lib_tools as pt
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
+
+
+def get_random_accident(X_test, y_test, grav_only=False):
+    y_acc = 0
+    i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
+    X_acc = X_test.iloc[i,:]
+    y_acc = y_test.values[i]
+    if grav_only:
+        while y_acc != 1:
+            i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
+            X_acc = X_test.iloc[i,:]
+            y_acc = y_test.values[i]
+
+    return (X_acc, y_acc, i)
 
 def get_DataFrame(file_type, year):
     if file_type == 'usagers':   df = load_usagers(year, year)
@@ -10,6 +28,9 @@ def get_DataFrame(file_type, year):
 
     return df
 
+def get_working_dataset():
+    X_train, y_train, X_valid, y_valid, X_test, y_test = pt.get_train_valid_test_data('dev')
+    return X_train
 
 def load_caract(start_year, end_year):
     """
@@ -155,3 +176,205 @@ def load_vehicules(start_year, end_year):
         if 2005 <= year <= 2021:
             vehic[year] = pd.read_csv(DIR_DATA_GOUV + f'vehicules{car}{year}.csv', sep=sep, dtype=dic_types)
     return vehic
+
+
+def get_dep_list():
+    return ['01',
+            '02',
+            '03',
+            '04',
+            '05',
+            '06',
+            '07',
+            '08',
+            '09',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+            '16',
+            '17',
+            '18',
+            '19',
+            '20',
+            '21',
+            '22',
+            '23',
+            '24',
+            '25',
+            '26',
+            '27',
+            '28',
+            '29',
+            '30',
+            '31',
+            '32',
+            '33',
+            '34',
+            '35',
+            '36',
+            '37',
+            '38',
+            '39',
+            '40',
+            '41',
+            '42',
+            '43',
+            '44',
+            '45',
+            '46',
+            '47',
+            '48',
+            '49',
+            '50',
+            '51',
+            '52',
+            '53',
+            '54',
+            '55',
+            '56',
+            '57',
+            '58',
+            '59',
+            '60',
+            '61',
+            '62',
+            '63',
+            '64',
+            '65',
+            '66',
+            '67',
+            '68',
+            '69',
+            '70',
+            '71',
+            '72',
+            '73',
+            '74',
+            '75',
+            '76',
+            '77',
+            '78',
+            '79',
+            '80',
+            '81',
+            '82',
+            '83',
+            '84',
+            '85',
+            '86',
+            '87',
+            '88',
+            '89',
+            '90',
+            '91',
+            '92',
+            '93',
+            '94',
+            '95',
+            '971',
+            '972',
+            '973',
+            '974',
+            '976']
+
+def get_catv_list():
+    return [-1,
+            1,
+            2,
+            7,
+            10,
+            30,
+            33]
+
+def plot_compare_models():
+    df = pd.DataFrame(data=[], columns=['precision', 'recall', 'f1-score'], index=['Decision Tree', 'Random Forests', 'Gradient Boosting', 'CatBoost'])
+    df.precision = [0.36, 0.27, 0.38, 0.43]
+    df.recall = [0.51, 0.76, 0.70, 0.55]
+    df['f1-score'] = [0.36, 0.40, 0.49, 0.48]
+    df['accuracy'] = [0.66, 0.57, 0.73, 0.78]
+
+    fig, axs = plt.subplots(1, 4, figsize=(12, 4), sharey=True)
+    palette = sns.color_palette("pastel")
+
+    sns.barplot(x=df.index, y='precision', data=df, palette=palette, ax=axs[0])
+    axs[0].set_title('Precision')
+
+    sns.barplot(x=df.index, y='recall', data=df, palette=palette, ax=axs[1])
+    axs[1].set_title('Recall')
+
+    sns.barplot(x=df.index, y='f1-score', data=df, palette=palette, ax=axs[2])
+    axs[2].set_title('F1-score')
+
+    sns.barplot(x=df.index, y='accuracy', data=df, palette=palette, ax=axs[3])
+    axs[3].set_title('Accuracy')
+
+    for ax in axs:
+        ax.set_ylim([0, 1])
+        ax.set_xticklabels(df.index, rotation=80)
+        ax.grid(True, axis='y', linestyle='--', linewidth='0.3')
+        ax.get_yaxis().set_visible(True)
+
+    return df, fig
+
+def plot_prob_densities(model, X_test, y_test, ind):
+    X_test.dep = X_test.dep.astype('int')
+    y_pred_proba = model.predict_proba(X_test)
+    y_pred_prob_single = model.predict_proba(X_test.iloc[ind, :])[1]
+    y_true = y_test.iloc[ind]
+
+    fig = plt.figure(figsize=(12,12))
+    sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
+    sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave")
+    plt.legend()
+    plt.axvline(x=y_pred_prob_single, color='r', linestyle='--')
+
+    return fig, y_pred_prob_single, y_true
+
+def get_smart_xpl(model, X_test, y_test):
+    from shapash import SmartExplainer
+    from my_libs import ref_labels
+    import pickle
+    import shap
+    shap.initjs()
+
+    all_var = True
+    if all_var :
+        label_dict = ref_labels.dic_target
+        preprocessing = ref_labels.dic_preproc
+        features_dic = ref_labels.dic_features
+    else :
+        label_dict = None
+        preprocessing = None
+        features_dic = None
+
+    xpl = SmartExplainer(
+        model=model,
+        label_dict=label_dict,
+        preprocessing=preprocessing,
+        features_dict=features_dic,  # Optional parameter
+    )
+
+    y_test.index = X_test.index
+
+    xpl.compile(
+        x=X_test,
+        # y_pred=y_pred, # Optional: for your own prediction (by default: model.predict)
+        y_target=y_test, # Optional: allows to display True Values vs Predicted Values
+    )
+    return xpl
+
+def get_local_explanation_fig(xpl, ind):
+    # local_summary = xpl.summarize(row_num=ind)
+    # # Display the local explanation summary in a readable format
+    # local_summary.to_pandas()
+    # Plot the local explanation
+    # xpl.plot.config.backend = "matplotlib"
+
+    fig = plt.figure(figsize=(3,3))
+    xpl.plot.local_plot(row_num=ind)
+    # fig, _ = xpl.plot.local_plot(index=individual_index)
+
+    return fig

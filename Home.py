@@ -26,3 +26,4 @@ with col2:
     st.image("./pics/CarCrash2.jpg", width=400)
 
 
+

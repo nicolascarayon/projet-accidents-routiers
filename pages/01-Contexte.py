@@ -15,13 +15,15 @@ source_data =   """
                 ##### Fichier BAAC : *Base de données Annuelles des Accidents Corporels de la circulation routière (2005 à 2021)*
                 """
 
+
 comp.header("Contexte")
 st.markdown("---")
-comp.subheader("Objectifs")
-st.markdown(objective)
 
 comp.subheader("Source de données")
 st.markdown(source_data)
+
+comp.subheader("Objectifs")
+st.markdown(objective)
 
 comp.subheader("Variable cible")
 st.markdown(def_gravite)

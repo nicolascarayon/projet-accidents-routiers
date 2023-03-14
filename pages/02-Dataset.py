@@ -20,9 +20,6 @@ with tab2:
     st.image("./pics/model-relational.jpg", width=600)
 
 with tab3:
-    import pandas as pd
-    import numpy as np
-    import time
     from pages.libs import utils
 
     comp.subheader("Entités")
@@ -34,4 +31,5 @@ with tab3:
     with st.spinner('Wait for it...'):
         data_dic = utils.get_DataFrame(file_type, year_sel)
     df = data_dic[year_sel]
+
     st.dataframe(df)

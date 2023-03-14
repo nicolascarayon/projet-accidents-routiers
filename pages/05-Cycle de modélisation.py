@@ -1,21 +1,22 @@
+import pandas as pd
 import streamlit as st
-from pages.libs import comp
+from pages.libs import comp, utils
 
 comp.sidebar_info()
 
 comp.header("Cycle de modélisation")
 
-tab_ctr, tab_opt, tab_dt, tab_rf, tab_gb, tab_cb = st.tabs(["Contraintes", "Optimisation d'hyperparamètres", "Decision Tree", "Random Forests", "Gradient Boosting", "CatBoost"])
+tab_ctr, tab_opt, tab_dt, tab_rf, tab_gb, tab_cb, tab_comp = st.tabs(["Contraintes", "Optimisation d'hyperparamètres", "Decision Tree",
+                                                                      "Random Forests", "Gradient Boosting", "CatBoost", "Comparatif"])
 
 with tab_ctr:
-    comp.subheader("Cadre")
     st.markdown("- ##### Données tabulaires")
     st.markdown("- ##### Données essentiellement catégorielles")
     st.markdown("- ##### Recherche d'un modèle explicable")
     st.markdown("- ##### Temps et moyens matériels limités")
 
-    comp.subheader("Stratégie")
-    st.markdown("##### Tous ces éléments amènent aux choix d'algorithmes basés sur les arbres de décision")
+    # comp.subheader("Stratégie")
+    comp.subheader("> Choix d'algorithmes basés sur les arbres de décision")
     st.markdown("- ##### 1. Modèle simple : Decision Tree")
     st.markdown("- ##### 2. Aggrégation de modèles simples : Random Forests")
     st.markdown("- ##### 3. Méthode de Boosting : Gradient Boosting Classifier")
@@ -64,6 +65,10 @@ with tab_rf:
 
 with tab_gb:
     comp.subheader("Gradient Boosting")
+    st.markdown("- ##### Principe proche du Random Forest, plusieurs classifieurs *faibles* sont combinés pour donner un classifieur fort")
+    st.markdown("- ##### l'entraînement des modèles simples se fait sur données aléatoires avec remise")
+    st.markdown("- ##### à chaque itération le modèle se concentre à améliorer la prédiction des erreurs du modèle de l'intération précédente")
+    st.markdown("- ##### La fonction de coût est optimisée à chaque étape selon une descente de gradient")
 
     show_res_gb = st.checkbox("Résultats", key="chk_res_gb")
     if show_res_gb:
@@ -75,6 +80,9 @@ with tab_gb:
 
 with tab_cb:
     comp.header("CatBoost")
+    st.markdown("- ##### Algorithme de Gradient Boosting optimisé pour les jeux de données catégorielles")
+    st.markdown("- ##### Utilise une technique de régularisation pour éviter le sur-apprentissage (Overfitting Detector)")
+    st.markdown("- ##### Capable de traiter les valeurs manquantes directement sans preprocessing")
 
     show_res_cb = st.checkbox("Résultats", key="chk_res_cb")
     if show_res_cb:
@@ -83,3 +91,15 @@ with tab_cb:
             st.image("./pics/cb-classif-report.png", width=500)
         with col2:
             st.image("./pics/cb-confusion.png", width=250)
+
+with tab_comp:
+    comp.header("Comparatif")
+    df_comp, fig = utils.plot_compare_models()
+
+    st.dataframe(df_comp)
+    col1, col2 = st.columns([4, 3])
+    with col1:
+        st.pyplot(fig)
+    with col2:
+        st.write("")
+
