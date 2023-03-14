@@ -461,7 +461,7 @@ def get_dep_code(dep):
     if len(dep) == 1:
         dep_code = "0" + dep
     if len(dep) == 3 and dep[-1] == "0":
-        dep_clean = dep[0:2]
+        dep_code = dep[0:2]
     if (dep == '201') or (dep == '2A'): dep_code = '20'
     if (dep == '202') or (dep == '2B'): dep_code = '20'
 
