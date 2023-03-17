@@ -14,17 +14,26 @@ with tab_trait:
     st.markdown("- ##### Ré-encodage de variables avec trop de modalités (ex : catégorie de véhicules passée de 40 à 7)")
     st.markdown("- ##### Target encoding de la variable *Département* (en raison du grand nombre de modalités)")
     st.markdown("- ##### One Hot Encoding de toutes les variables catégorielles")
-    st.markdown("- ##### Ré-encodage de la cible en 2 modalités : 0 - Indemne/Blessé léger vs. 1 - Blessé hospitalisé/Tué")
+    st.markdown("- ##### Ré-encodage de la cible en 2 modalités : *Non grave* (0) vs. *Grave* (1)")
     st.markdown("- ##### Ré-équilibrage des classes par algorithme SMOTE (Synthetic Minority Oversampling TEchnique)")
+    #
+    # col1, col2 = st.columns([1, 9])
+    # with col1:
+    #     smote_principle   = st.checkbox("Principe")
+    # with col2:
+    #     smote_application = st.checkbox("Application")
+    #
+    # if smote_principle   : st.image("./pics/smote-principle.png", width=500)
+    # if smote_application :  st.image("./pics/smote-application.png", width=500)
 
-    col1, col2 = st.columns([1, 9])
-    with col1:
-        smote_principle   = st.checkbox("Principe")
-    with col2:
-        smote_application = st.checkbox("Application")
+    exp_principle = st.expander("Principe")
+    with exp_principle:
+        st.image("./pics/smote-principle.png")
 
-    if smote_principle   : st.image("./pics/smote-principle.png", width=500)
-    if smote_application :  st.image("./pics/smote-application.png", width=500)
+    exp_apply = st.expander("Application")
+    with exp_apply:
+        st.image("./pics/smote-application.png")
+
 
 with tab_dataset:
     comp.header("Working Dataset")

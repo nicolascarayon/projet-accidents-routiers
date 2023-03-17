@@ -6,7 +6,7 @@ comp.sidebar_info()
 
 comp.header("Cycle de modélisation")
 
-tab_ctr, tab_opt, tab_dt, tab_rf, tab_gb, tab_cb, tab_comp = st.tabs(["Contraintes", "Optimisation d'hyperparamètres", "Decision Tree",
+tab_ctr, tab_dt, tab_rf, tab_gb, tab_cb, tab_comp = st.tabs(["Contraintes", "Decision Tree",
                                                                       "Random Forests", "Gradient Boosting", "CatBoost", "Comparatif"])
 
 with tab_ctr:
@@ -15,24 +15,26 @@ with tab_ctr:
     st.markdown("- ##### Recherche d'un modèle explicable")
     st.markdown("- ##### Temps et moyens matériels limités")
 
-    # comp.subheader("Stratégie")
-    comp.subheader("> Choix d'algorithmes basés sur les arbres de décision")
-    st.markdown("- ##### 1. Modèle simple : Decision Tree")
-    st.markdown("- ##### 2. Aggrégation de modèles simples : Random Forests")
-    st.markdown("- ##### 3. Méthode de Boosting : Gradient Boosting Classifier")
-    st.markdown("- ##### 4. Algorithme de Boosting spécifique aux données catégorielles : CatBoost")
+    col_models, col_pic_models = st.columns([1, 1])
+    with col_models:
+        comp.subheader("Choix d'algorithmes basés sur les arbres de décision")
+        st.markdown("- ##### 1. Modèle simple : Decision Tree")
+        st.markdown("- ##### 2. Aggrégation de modèles simples : Random Forests")
+        st.markdown("- ##### 3. Méthodes de Boosting : Gradient Boosting Classifier")
+        col_marge, col_text = st.columns([1, 20])
+        col_text.write("- Gradient Boosting Classifier (scikit-learn)")
+        col_text.write("- Catboost : spécifique aux données catégorielles")
+    with col_pic_models:
+        st.image("./pics/models-evol.png")
 
-with tab_opt:
     comp.subheader("Optimisation d'hyperparamètres")
-
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("- ##### Grâce à la librairie *Optuna* (et non GridSearchCV de scikit-learn) permettant une optimisation Bayesienne")
         st.markdown("- ##### Basée sur la recherche à base d'estimateur TPE (Tree-structured Parzen Estimator)")
         st.write("TPE utilise une distribution de probabilité pour estimer la performance de chaque combinaison d'hyperparamètres de façon itérative")
     with col2:
-        st.image("./pics/optuna-logo.png", width=300)
-
+        st.image("./pics/optuna-logo.png", width=200)
 
 with tab_dt:
     comp.subheader("Decision Tree")
