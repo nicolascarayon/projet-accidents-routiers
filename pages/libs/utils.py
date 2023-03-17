@@ -11,31 +11,38 @@ DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 def get_local_summary_plot(df):
     feat_names = []
     feat_contrib = []
+    mult=1
     for ind in df.index:
+        if ind=="y_pred":
+            if df.loc[ind]=="Indemne - Blessé léger":
+                mult=-1
         if "feature_" in ind: feat_names.append(df.loc[ind])
-        if "contribution_" in ind: feat_contrib.append(df.loc[ind])
+        if "contribution_" in ind: feat_contrib.append(mult*df.loc[ind])
 
     data = pd.DataFrame(columns=['feature', 'contrib'])
     data['feature'] = feat_names
     data['contrib'] = feat_contrib
+    data = data.sort_values(by='contrib', ascending=False)
 
-    fig = plt.figure(figsize=(8,8))
+    fig = plt.figure(figsize=(8,12))
     sns.set_color_codes("pastel")
-    sns.barplot(x="contrib", y="feature", data=data)#,            label="Total", color="b")
+    sns.barplot(x="contrib", y="feature", data=data, alpha=0.6)
 
     return fig
+
 def get_random_accident(X_test, y_test, grav_only=False):
     y_acc = 0
     i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
     X_acc = X_test.iloc[i,:]
     y_acc = y_test.values[i]
-    index = X_test.index[i]
     if grav_only:
         while y_acc != 1:
             i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
             X_acc = X_test.iloc[i,:]
             y_acc = y_test.values[i]
-    return (X_acc, y_acc, i, index)
+    index = X_test.index[i]
+    return (X_acc, y_acc, index)
+
 
 def get_DataFrame(file_type, year):
     if file_type == 'usagers':   df = load_usagers(year, year)
@@ -336,17 +343,17 @@ def plot_compare_models():
 
     return df, fig
 
-def plot_prob_densities(model, X_test, y_test, ind):
+def plot_prob_densities(model, X_test, y_test, index):
     X_test.dep = X_test.dep.astype('int')
     y_pred_proba = model.predict_proba(X_test)
-    y_pred_prob_single = model.predict_proba(X_test.iloc[ind, :])[1]
-    y_true = y_test.iloc[ind]
+    y_pred_prob_single = model.predict_proba(X_test.loc[index])[1]
+    y_true = y_test.loc[index]
 
     fig = plt.figure(figsize=(12,12))
-    sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
-    sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave")
-    plt.legend()
-    plt.axvline(x=y_pred_prob_single, color='r', linestyle='--')
+    # sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
+    sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave", color="darkorange")
+    # plt.legend(loc='upper center')
+    plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
 
     return fig, y_pred_prob_single, y_true
 
