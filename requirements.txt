@@ -29,4 +29,3 @@ typing_extensions~=4.3.0
 cython~=0.29.32
 future~=0.18.2
 scikit-learn~=1.0.2
-daal==2021.4.0
