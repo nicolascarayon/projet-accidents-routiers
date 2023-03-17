@@ -1,24 +1,41 @@
 import pandas as pd
 import numpy as np
+import plotly
+
 from my_libs import lib_tools as pt
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 
+def get_local_summary_plot(df):
+    feat_names = []
+    feat_contrib = []
+    for ind in df.index:
+        if "feature_" in ind: feat_names.append(df.loc[ind])
+        if "contribution_" in ind: feat_contrib.append(df.loc[ind])
 
+    data = pd.DataFrame(columns=['feature', 'contrib'])
+    data['feature'] = feat_names
+    data['contrib'] = feat_contrib
+
+    fig = plt.figure(figsize=(8,8))
+    sns.set_color_codes("pastel")
+    sns.barplot(x="contrib", y="feature", data=data)#,            label="Total", color="b")
+
+    return fig
 def get_random_accident(X_test, y_test, grav_only=False):
     y_acc = 0
     i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
     X_acc = X_test.iloc[i,:]
     y_acc = y_test.values[i]
+    index = X_test.index[i]
     if grav_only:
         while y_acc != 1:
             i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
             X_acc = X_test.iloc[i,:]
             y_acc = y_test.values[i]
-
-    return (X_acc, y_acc, i)
+    return (X_acc, y_acc, i, index)
 
 def get_DataFrame(file_type, year):
     if file_type == 'usagers':   df = load_usagers(year, year)
@@ -366,7 +383,7 @@ def get_smart_xpl(model, X_test, y_test):
     )
     return xpl
 
-def get_local_explanation_fig(xpl, ind):
+def get_local_explanation(xpl, ind):
     # local_summary = xpl.summarize(row_num=ind)
     # # Display the local explanation summary in a readable format
     # local_summary.to_pandas()
@@ -374,7 +391,8 @@ def get_local_explanation_fig(xpl, ind):
     # xpl.plot.config.backend = "matplotlib"
 
     fig = plt.figure(figsize=(3,3))
+    summary_df = xpl.to_pandas(proba=True)
     xpl.plot.local_plot(row_num=ind)
     # fig, _ = xpl.plot.local_plot(index=individual_index)
 
-    return fig
+    return fig, summary_df
