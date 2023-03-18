@@ -21,7 +21,6 @@ def disp_acc_values(X_acc):
         dict_feat = refs.dic_feat_mods[feat]
         st.write(f"{dict_feat[int(X_acc[feat])]}")
 
-
 with tab_shap:
     comp.subheader("Valeurs de Shapley")
     st.markdown("- ##### Mesure de la contribution de chaque variable dans la prédiction finale")
@@ -41,19 +40,13 @@ with tab_shap:
         st.image("./pics/logo-maif.png", width=150)
 
 with tab_app_cb:
-    if 'model' not in st.session_state.keys(): st.session_state['model'] = load("./h5_models/model_cb_prd_64000x26.h5")
-    if 'data_test' not in st.session_state.keys(): st.session_state['data_test'] = pd.read_pickle(
-        "./pickles/df-prd-test.pkl")
-    if 'X_test' not in st.session_state.keys(): st.session_state['X_test'] = st.session_state['data_test'].drop(
-        columns=['grav'], axis=1)
-    if 'y_test' not in st.session_state.keys(): st.session_state['y_test'] = st.session_state['data_test'].grav
-    if 'X_acc' not in st.session_state.keys():
-        print("get_random_accident dans tab_app_cb")
-        st.session_state['acc_grav_only'] = False
-        st.session_state['X_acc'], st.session_state['y_acc'], st.session_state['index'] = \
-            utils.get_random_accident(st.session_state['X_test'], st.session_state['y_test'],
-                                      st.session_state['acc_grav_only'])
-    if 'xpl' not in st.session_state.keys():
+    if 'model'      not in st.session_state.keys(): st.session_state['model']      = load("./h5_models/model_cb_prd_64000x26.h5")
+    if 'data_test'  not in st.session_state.keys(): st.session_state['data_test']  = pd.read_pickle("./pickles/df-prd-test.pkl")
+    if 'X_test'     not in st.session_state.keys(): st.session_state['X_test']     = st.session_state['data_test'].drop(columns=['grav'], axis=1)
+    if 'y_test'     not in st.session_state.keys(): st.session_state['y_test']     = st.session_state['data_test'].grav
+    if 'acc_types'  not in st.session_state.keys(): st.session_state['acc_types']  = [refs.dic_grav_sht[0], refs.dic_grav_sht[1]]
+    if 'pred_types' not in st.session_state.keys(): st.session_state['pred_types'] = [refs.dic_pred_type[0], refs.dic_pred_type[1]]
+    if 'xpl'        not in st.session_state.keys():
         st.session_state['xpl'] = utils.get_smart_xpl(st.session_state.model, st.session_state.X_test,
                                                       st.session_state.y_test)
         st.session_state['y_pred'] = pd.Series(st.session_state.model.predict(st.session_state.X_test))
@@ -64,31 +57,43 @@ with tab_app_cb:
             y_target=st.session_state.y_test,
         )
         st.session_state['summary_df'] = st.session_state.xpl.to_pandas(proba=False, max_contrib=10)
+    if 'X_acc'      not in st.session_state.keys():
+        print("get_random_accident dans tab_app_cb")
+        st.session_state['X_acc'], \
+            st.session_state['y_acc'], \
+            st.session_state['index'] = utils.get_random_accident(st.session_state.data_test,
+                                                                  st.session_state.y_pred,
+                                                                  st.session_state.acc_types,
+                                                                  st.session_state.pred_types)
 
-    col_btn, col_cb_acc_type, col_index, col_empty = st.columns([1, 1, 1, 6])
+    # Options
+    col_cb_acc_grave, col_pred_type, col_btn, col_index, col_empty = st.columns([3, 4, 1, 1, 6])
+
+    with col_cb_acc_grave:
+        st.session_state.acc_types = st.multiselect(label="Type d'accident", options=refs.dic_grav_sht.values(), label_visibility="collapsed")
+
+    with col_pred_type:
+        st.session_state.pred_types = st.multiselect(label="Prédiction", options=refs.dic_pred_type.values(), label_visibility="collapsed")
+
     with col_btn:
-        st.session_state['acc_grav_only'] = st.checkbox(label="Accidents graves")
-
-        # print("get_random_accident dans col_btn")
-        # st.session_state['X_acc'], st.session_state['y_acc'], st.session_state['index'] = utils.get_random_accident(st.session_state['X_test'], st.session_state['y_test'], st.session_state['acc_grav_only'])
-        # st.experimental_rerun()
-
-    with col_cb_acc_type:
-        if st.button('New accident'):
+        if st.button('Accident'):
             st.write("")
             # st.experimental_rerun()
             print("get_random_accident dans col_cb_acc_type")
             st.session_state['X_acc'], st.session_state['y_acc'], st.session_state['index'] = utils.get_random_accident(
-                st.session_state.X_test,
-                st.session_state.y_test,
-                st.session_state.acc_grav_only)
+                st.session_state.data_test,
+                st.session_state.y_pred,
+                st.session_state.acc_types,
+                st.session_state.pred_types)
 
     with col_index:
-        index = st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index")
+        print(f"st.session_state.index : {st.session_state.index}")
+        st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index")
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    # Results
+    col_acc, col_pred, col_shap = st.columns([1, 0.8, 1])
 
-    with col1:
+    with col_acc:
         col_label, col_value = st.columns([0.8, 1])
 
         with col_label:
@@ -100,22 +105,26 @@ with tab_app_cb:
                 X_acc = st.session_state['X_acc']
                 disp_acc_values(X_acc)
 
-    with col2:
+    with col_pred:
         col_graph_densities, col_diagnosis = st.columns([1, 1])
         # with col_graph_densities:
-        fig, y_pred_proba, y_true = utils.plot_prob_densities(st.session_state.model, st.session_state.X_test,
-                                                              st.session_state.y_test, st.session_state.index)
-        pred = "Grave" if y_pred_proba >= 0.5 else "Non grave"
-        vraie_valeur = "Grave" if y_true == 1 else "Non grave"
+        fig, y_pred_proba, y_true = utils.plot_prob_densities(st.session_state.model,
+                                                              st.session_state.X_test,
+                                                              st.session_state.y_test,
+                                                              st.session_state.index)
+        if y_pred_proba is not None:
+            pred = "Grave" if y_pred_proba >= 0.5 else "Non grave"
+            vraie_valeur = "Grave" if y_true == 1 else "Non grave"
 
-        st.info(f"Probabilité prédite d'accident grave : {int(y_pred_proba * 100)}%")
-        if pred == vraie_valeur:
-            st.success(f"Prédiction : {pred} - Vraie valeur : {vraie_valeur}")
-        else:
-            st.error(f"Prédiction : {pred} - Vraie valeur : {vraie_valeur}")
-        st.pyplot(fig)
+            st.info(f"Probabilité prédite d'accident grave : {int(y_pred_proba * 100)}%")
+            if pred == vraie_valeur:
+                st.success(f"Prédiction : {pred} - Vraie valeur : {vraie_valeur}")
+            else:
+                st.error(f"Prédiction : {pred} - Vraie valeur : {vraie_valeur}")
+            st.pyplot(fig)
 
-    with col3:
+    with col_shap:
         st.subheader("Contribution par feature")
-        fig = utils.get_local_summary_plot(st.session_state.summary_df.loc[st.session_state.index])
-        st.pyplot(fig)
+        if st.session_state['index'] is not None:
+            fig = utils.get_local_summary_plot(st.session_state.summary_df.loc[st.session_state.index])
+            st.pyplot(fig)

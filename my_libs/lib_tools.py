@@ -37,6 +37,7 @@ def load_proj_df(start_year, end_year, verbose=0):
     df = clean_nbv(df)
     df = clean_actp(df)
     df = clean_etatp(df)
+    df = clean_plan(df)
     df = clean_catv(df)
     df = clean_catu(df)
     df = clean_circ(df)
@@ -45,7 +46,8 @@ def load_proj_df(start_year, end_year, verbose=0):
     df = create_joursem(df)
     df = create_grav_lbl(df)
     df = drop_columns_from_df(df,
-                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn', 'senc'],
+                              ['an_nais', 'age', 'grav_lbl', 'Num_Acc', 'datetime', 'an', 'num_veh', 'jour', 'hrmn',
+                               'senc'],
                               verbose)
     df = encode_grav(df, verbose)
     df = set_target_first_column(df, verbose)
@@ -480,10 +482,18 @@ def clean_actp(df):
 
     return df
 
+
 def clean_etatp(df):
     df.etatp = df.etatp.replace(to_replace=[0], value=[-1])
 
     return df
+
+
+def clean_plan(df):
+    df.plan = df.plan.replace(to_replace=[0], value=[-1])
+
+    return df
+
 
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]

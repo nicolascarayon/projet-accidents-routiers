@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly
+from my_libs import ref_labels as refs
 
 from my_libs import lib_tools as pt
 import matplotlib.pyplot as plt
@@ -8,23 +9,24 @@ import seaborn as sns
 
 DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
 
+
 def get_local_summary_plot(df):
     feat_names = []
     feat_contrib = []
-    mult=1
+    mult = 1
     for ind in df.index:
-        if ind=="y_pred":
-            if df.loc[ind]=="Indemne - Blessé léger":
-                mult=-1
+        if ind == "y_pred":
+            if df.loc[ind] == "Indemne - Blessé léger":
+                mult = -1
         if "feature_" in ind: feat_names.append(df.loc[ind])
-        if "contribution_" in ind: feat_contrib.append(mult*df.loc[ind])
+        if "contribution_" in ind: feat_contrib.append(mult * df.loc[ind])
 
     data = pd.DataFrame(columns=['feature', 'contrib'])
     data['feature'] = feat_names
     data['contrib'] = feat_contrib
     data = data.sort_values(by='contrib', ascending=False)
 
-    fig = plt.figure(figsize=(8,12))
+    fig = plt.figure(figsize=(8, 12))
     # sns.set_color_codes("pastel")
     # sns.barplot(x="contrib", y="feature", data=data, alpha=0.6)
     colors = ['lightskyblue' if x < 0 else 'orange' for x in data['contrib']]
@@ -35,34 +37,60 @@ def get_local_summary_plot(df):
     plt.xlabel("")
     plt.ylabel("")
 
-
     return fig
 
-def get_random_accident(X_test, y_test, grav_only=False):
-    y_acc = 0
-    i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
-    X_acc = X_test.iloc[i,:]
-    y_acc = y_test.values[i]
-    if grav_only:
-        while y_acc != 1:
-            i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
-            X_acc = X_test.iloc[i,:]
-            y_acc = y_test.values[i]
-    index = X_test.index[i]
-    return (X_acc, y_acc, index)
+
+def get_random_accident(data_test, y_pred, acc_types, pred_types):
+    acc_grav_val, pred_types_val = [], []
+
+    if len(acc_types) == 0 and len(pred_types) == 0: return None, None, None
+
+    for val in acc_types:
+        acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
+    for val in pred_types:
+        pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
+
+    data_test_filtered = data_test[data_test.grav.isin(acc_grav_val)]
+    y_pred_filtered = y_pred[data_test.grav.isin(acc_grav_val)]
+
+    i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
+    print(f"i : {i}")
+    print(f"data_test_filtered : {data_test_filtered.shape}")
+    data_test_acc = data_test_filtered.iloc[i, :]
+
+    y_pred_acc = y_pred_filtered.iloc[i]
+
+    # look for a good prediction
+    if pred_types == [refs.dic_pred_type[0]]:
+        print("filtre pred good")
+        while (data_test_acc.grav != y_pred_acc):
+            i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
+            data_test_acc = data_test_filtered.iloc[i, :]
+            y_pred_acc = y_pred_filtered.iloc[i]
+
+    # look for a wrong prediction
+    if pred_types == [refs.dic_pred_type[1]]:
+        print("filtre pred wrong")
+
+    X_acc = data_test_acc.drop('grav')
+    y_acc = data_test_acc.grav
+
+    return (X_acc, y_acc, data_test_filtered.index[i])
 
 
 def get_DataFrame(file_type, year):
-    if file_type == 'usagers':   df = load_usagers(year, year)
+    if file_type == 'usagers'  : df = load_usagers(year, year)
     if file_type == 'accidents': df = load_caract(year, year)
-    if file_type == 'lieux':     df = load_lieux(year, year)
+    if file_type == 'lieux'    : df = load_lieux(year, year)
     if file_type == 'véhicules': df = load_vehicules(year, year)
 
     return df
 
+
 def get_working_dataset():
     X_train, y_train, X_valid, y_valid, X_test, y_test = pt.get_train_valid_test_data('dev')
     return X_train
+
 
 def load_caract(start_year, end_year):
     """
@@ -312,6 +340,7 @@ def get_dep_list():
             '974',
             '976']
 
+
 def get_catv_list():
     return [-1,
             1,
@@ -321,8 +350,10 @@ def get_catv_list():
             30,
             33]
 
+
 def plot_compare_models():
-    df = pd.DataFrame(data=[], columns=['precision', 'recall', 'f1-score'], index=['Decision Tree', 'Random Forests', 'Gradient Boosting', 'CatBoost'])
+    df = pd.DataFrame(data=[], columns=['precision', 'recall', 'f1-score'],
+                      index=['Decision Tree', 'Random Forests', 'Gradient Boosting', 'CatBoost'])
     df.precision = [0.36, 0.27, 0.38, 0.43]
     df.recall = [0.51, 0.76, 0.70, 0.55]
     df['f1-score'] = [0.36, 0.40, 0.49, 0.48]
@@ -351,19 +382,24 @@ def plot_compare_models():
 
     return df, fig
 
+
 def plot_prob_densities(model, X_test, y_test, index):
+    if index is None: return None, None, None
+
     X_test.dep = X_test.dep.astype('int')
     y_pred_proba = model.predict_proba(X_test)
+
     y_pred_prob_single = model.predict_proba(X_test.loc[index])[1]
     y_true = y_test.loc[index]
 
-    fig = plt.figure(figsize=(12,12))
+    fig = plt.figure(figsize=(12, 12))
     # sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
-    sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave", color="darkorange")
+    sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Grave", color="darkorange")
     # plt.legend(loc='upper center')
-    plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
+    if y_pred_prob_single is not None: plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
 
     return fig, y_pred_prob_single, y_true
+
 
 def get_smart_xpl(model, X_test, y_test):
     from shapash import SmartExplainer
@@ -373,11 +409,11 @@ def get_smart_xpl(model, X_test, y_test):
     shap.initjs()
 
     all_var = True
-    if all_var :
+    if all_var:
         label_dict = ref_labels.dic_target
         preprocessing = ref_labels.dic_preproc
         features_dic = ref_labels.dic_features
-    else :
+    else:
         label_dict = None
         preprocessing = None
         features_dic = None
@@ -394,9 +430,10 @@ def get_smart_xpl(model, X_test, y_test):
     xpl.compile(
         x=X_test,
         # y_pred=y_pred, # Optional: for your own prediction (by default: model.predict)
-        y_target=y_test, # Optional: allows to display True Values vs Predicted Values
+        y_target=y_test,  # Optional: allows to display True Values vs Predicted Values
     )
     return xpl
+
 
 def get_local_explanation(xpl, ind):
     # local_summary = xpl.summarize(row_num=ind)
@@ -405,7 +442,7 @@ def get_local_explanation(xpl, ind):
     # Plot the local explanation
     # xpl.plot.config.backend = "matplotlib"
 
-    fig = plt.figure(figsize=(3,3))
+    fig = plt.figure(figsize=(3, 3))
     summary_df = xpl.to_pandas(proba=True)
     xpl.plot.local_plot(row_num=ind)
     # fig, _ = xpl.plot.local_plot(index=individual_index)
