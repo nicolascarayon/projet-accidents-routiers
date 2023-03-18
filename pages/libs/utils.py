@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly
+from my_libs import ref_labels as refs
 
 from my_libs import lib_tools as pt
 import matplotlib.pyplot as plt
@@ -38,18 +39,42 @@ def get_local_summary_plot(df):
 
     return fig
 
-def get_random_accident(X_test, y_test, grav_only=False):
-    y_acc = 0
-    i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
-    X_acc = X_test.iloc[i,:]
-    y_acc = y_test.values[i]
-    if grav_only:
-        while y_acc != 1:
-            i = int(np.random.uniform(low=0, high=X_test.shape[0]-1))
-            X_acc = X_test.iloc[i,:]
-            y_acc = y_test.values[i]
-    index = X_test.index[i]
-    return (X_acc, y_acc, index)
+def get_random_accident(data_test, y_pred, acc_types, pred_types):
+    print('coucou')
+    acc_grav_val = []
+    pred_types_val = []
+
+    if len(acc_types) == 0 and len(pred_types) == 0 :
+        return None, None, None
+
+    for val in acc_types:
+        acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
+    for val in pred_types:
+        pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
+
+    print(f"acc_grav_val : {acc_grav_val}")
+    print(f"pred_types : {pred_types_val}")
+
+    # for key in refs.dic_grav_sht.keys():
+    #     if refs.dic_grav_sht[key] in acc_types:
+    #         acc_grav_lst.append(key)
+    #
+    # for key in refs.dic_pred_type.keys():
+    #     if refs.dic_pred_type[key] in pred_types:
+    #         pred_types_val.append(key)
+
+    data_test_filtered = data_test[data_test.grav.isin(acc_grav_val)]
+    print(data_test_filtered)
+
+    i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0]-1))
+    data_test_rand = data_test_filtered
+
+    X_acc = X_test_search.loc[filtered_data[i]]
+    y_acc = y_test_search.loc[filtered_data[i]]
+
+
+
+    return (X_acc, y_acc, X_test_ind_lst[i])
 
 
 def get_DataFrame(file_type, year):
@@ -352,8 +377,11 @@ def plot_compare_models():
     return df, fig
 
 def plot_prob_densities(model, X_test, y_test, index):
+    if index is None: return None, None, None
+
     X_test.dep = X_test.dep.astype('int')
     y_pred_proba = model.predict_proba(X_test)
+
     y_pred_prob_single = model.predict_proba(X_test.loc[index])[1]
     y_true = y_test.loc[index]
 
@@ -361,7 +389,7 @@ def plot_prob_densities(model, X_test, y_test, index):
     # sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
     sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave", color="darkorange")
     # plt.legend(loc='upper center')
-    plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
+    if y_pred_prob_single is not None: plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
 
     return fig, y_pred_prob_single, y_true
 

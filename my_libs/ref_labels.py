@@ -120,9 +120,14 @@ dic_lum = {1: 'Plein jour',
            4: 'Nuit avec éclairage public non allumé',
            5: 'Nuit avec éclairage public allumé'}
 
-dic_grav = {'def': 'Gravité',
-            0: 'Indemne - Blessé léger',
+dic_grav = {0: 'Indemne - Blessé léger',
             1: 'Tué - Blessé hospitalisé'}
+
+dic_grav_sht = {0: "Non grave",
+                1: "Grave"}
+
+dic_pred_type = {0: "Bonne prédiction",
+                 1: "Mauvaise prédiction"}
 
 dic_catu = {'def': "Catégorie d'usager",
             1: 'Conducteur',
