@@ -199,13 +199,12 @@ dic_actp = {-1: 'Non renseigné',
             'A': 'Monte/descend du véhicule',
             'B': 'Inconnue'}
 
-dic_etatp = {'def': 'Piéton seul on non',
-             -1: 'Non renseigné',
+dic_etatp = {-1: 'Non renseigné',
              1: 'Seul',
              2: 'Accompagné',
              3: 'En groupe'}
 
-dic_vosp = {1 : "Non renseigné",
+dic_vosp = {-1 : "Non renseigné",
             0 : "Sans objet",
             1 : "Piste cyclable",
             2 : "Bande cyclable",
