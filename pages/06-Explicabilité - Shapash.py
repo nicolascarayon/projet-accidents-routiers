@@ -58,7 +58,6 @@ with tab_app_cb:
         )
         st.session_state['summary_df'] = st.session_state.xpl.to_pandas(proba=False, max_contrib=10)
     if 'X_acc'      not in st.session_state.keys():
-        print("get_random_accident dans tab_app_cb")
         st.session_state['X_acc'], \
             st.session_state['y_acc'], \
             st.session_state['index'] = utils.get_random_accident(st.session_state.data_test,
@@ -79,7 +78,6 @@ with tab_app_cb:
         if st.button('Accident'):
             st.write("")
             # st.experimental_rerun()
-            print("get_random_accident dans col_cb_acc_type")
             st.session_state['X_acc'], st.session_state['y_acc'], st.session_state['index'] = utils.get_random_accident(
                 st.session_state.data_test,
                 st.session_state.y_pred,
@@ -87,7 +85,6 @@ with tab_app_cb:
                 st.session_state.pred_types)
 
     with col_index:
-        print(f"st.session_state.index : {st.session_state.index}")
         st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index")
 
     # Results

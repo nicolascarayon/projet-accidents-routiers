@@ -54,15 +54,12 @@ def get_random_accident(data_test, y_pred, acc_types, pred_types):
     y_pred_filtered = y_pred[data_test.grav.isin(acc_grav_val)]
 
     i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
-    print(f"i : {i}")
-    print(f"data_test_filtered : {data_test_filtered.shape}")
     data_test_acc = data_test_filtered.iloc[i, :]
 
     y_pred_acc = y_pred_filtered.iloc[i]
 
     # look for a good prediction
     if pred_types == [refs.dic_pred_type[0]]:
-        print("filtre pred good")
         while (data_test_acc.grav != y_pred_acc):
             i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
             data_test_acc = data_test_filtered.iloc[i, :]
@@ -70,7 +67,10 @@ def get_random_accident(data_test, y_pred, acc_types, pred_types):
 
     # look for a wrong prediction
     if pred_types == [refs.dic_pred_type[1]]:
-        print("filtre pred wrong")
+        while (data_test_acc.grav == y_pred_acc):
+            i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
+            data_test_acc = data_test_filtered.iloc[i, :]
+            y_pred_acc = y_pred_filtered.iloc[i]
 
     X_acc = data_test_acc.drop('grav')
     y_acc = data_test_acc.grav
@@ -393,8 +393,7 @@ def plot_prob_densities(model, X_test, y_test, index):
     y_true = y_test.loc[index]
 
     fig = plt.figure(figsize=(12, 12))
-    # sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Non grave")
-    sns.kdeplot(y_pred_proba[:, 1], shade=True, cut=0, label="Grave", color="darkorange")
+    sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave", color="darkorange")
     # plt.legend(loc='upper center')
     if y_pred_prob_single is not None: plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
 
