@@ -25,8 +25,16 @@ def get_local_summary_plot(df):
     data = data.sort_values(by='contrib', ascending=False)
 
     fig = plt.figure(figsize=(8,12))
-    sns.set_color_codes("pastel")
-    sns.barplot(x="contrib", y="feature", data=data, alpha=0.6)
+    # sns.set_color_codes("pastel")
+    # sns.barplot(x="contrib", y="feature", data=data, alpha=0.6)
+    colors = ['lightskyblue' if x < 0 else 'orange' for x in data['contrib']]
+    sns.barplot(x="contrib", y="feature", data=data, alpha=0.5, palette=colors)
+    plt.grid(axis='x', linestyle='--')
+    plt.tick_params(axis='x', labelsize=18)
+    plt.tick_params(axis='y', labelsize=18)
+    plt.xlabel("")
+    plt.ylabel("")
+
 
     return fig
 
