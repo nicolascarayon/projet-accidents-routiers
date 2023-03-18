@@ -35,7 +35,8 @@ def load_proj_df(start_year, end_year, verbose=0):
     df = create_age_cls(df)
     df = clean_col_dep(df, True)
     df = clean_nbv(df)
-    # df = clean_actp(df)
+    df = clean_actp(df)
+    df = clean_etatp(df)
     df = clean_catv(df)
     df = clean_catu(df)
     df = clean_circ(df)
@@ -479,6 +480,10 @@ def clean_actp(df):
 
     return df
 
+def clean_etatp(df):
+    df.etatp = df.etatp.replace(to_replace=[0], value=[-1])
+
+    return df
 
 def clean_catv(df):
     df['catv'] = [catv if (catv in [7, 33, 10, 2, 30, 1]) else -1 for catv in df.catv]
