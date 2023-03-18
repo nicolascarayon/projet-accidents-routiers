@@ -47,34 +47,21 @@ def get_random_accident(data_test, y_pred, acc_types, pred_types):
     if len(acc_types) == 0 and len(pred_types) == 0 :
         return None, None, None
 
-    for val in acc_types:
-        acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
-    for val in pred_types:
-        pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
+    for val in acc_types: acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
+    for val in pred_types: pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
 
     print(f"acc_grav_val : {acc_grav_val}")
     print(f"pred_types : {pred_types_val}")
 
-    # for key in refs.dic_grav_sht.keys():
-    #     if refs.dic_grav_sht[key] in acc_types:
-    #         acc_grav_lst.append(key)
-    #
-    # for key in refs.dic_pred_type.keys():
-    #     if refs.dic_pred_type[key] in pred_types:
-    #         pred_types_val.append(key)
-
     data_test_filtered = data_test[data_test.grav.isin(acc_grav_val)]
-    print(data_test_filtered)
 
     i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0]-1))
-    data_test_rand = data_test_filtered
+    data_test_rand = data_test_filtered.iloc[i, :]
 
-    X_acc = X_test_search.loc[filtered_data[i]]
-    y_acc = y_test_search.loc[filtered_data[i]]
+    X_acc = data_test_rand.drop('grav', 1)
+    y_acc = data_test_rand.grav
 
-
-
-    return (X_acc, y_acc, X_test_ind_lst[i])
+    return (X_acc, y_acc, data_test_rand.index[i])
 
 
 def get_DataFrame(file_type, year):
