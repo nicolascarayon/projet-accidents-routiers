@@ -7,7 +7,7 @@ dic_target = {0: 'Indemne - Blessé léger',
 
 dic_features = {'grav': 'Gravité',
                 'senc': 'Sens de circulation',
-                'place ': "Place de l'usager",
+                'place': "Place de l'usager",
                 'catu': "Catégorie de l'usager",
                 'sexe': "sexe de l'usager",
                 'trajet': 'Motif du déplacement',
@@ -156,6 +156,14 @@ dic_atm = {-1: 'Non renseigné',
            8: 'Temps couvert',
            9: 'Autre'}
 
+dic_circ = {-1:"Non renseigné",
+            1:"A sens unique",
+            2:"Bidirectionnelle",
+            3:"A chaussée séparée",
+            4:"Avec des voies d'affectation variable"}
+
+dic_nbv = {-1:-1, 0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6}
+
 dic_col = {-1: 'Non renseigné',
            1: 'Deux véhicules - frontale',
            2: "Deux véhicules - par l'arrière",
@@ -191,6 +199,61 @@ dic_etatp = {'def': 'Piéton seul on non',
              1: 'Seul',
              2: 'Accompagné',
              3: 'En groupe'}
+
+dic_vosp = {1 : "Non renseigné",
+            0 : "Sans objet",
+            1 : "Piste cyclable",
+            2 : "Bande cyclable",
+            3 : "Voie réservée"}
+
+dic_prof = {-1 : "Non renseigné",
+            1 : "Plat",
+            2 : "Pente",
+            3 : "Sommet de côte",
+            4 : "Bas de côte"}
+
+dic_plan = {-1 : "Non renseigné",
+            1 : "Partie rectiligne",
+            2 : "En courbe à gauche",
+            3 : "En courbe à droite",
+            4 : "En « S » "}
+
+dic_surf = {-1 : "Non renseigné",
+            1 : "Normale",
+            2 : "Mouillée",
+            3 : "Flaques",
+            4 : "Inondée",
+            5 : "Enneigée",
+            6 : "Boue",
+            7 : "Verglacée",
+            8 : "Corps gras – huile",
+            9 : "Autre"}
+
+dic_infra = {-1 : "Non renseigné",
+             0 : "Aucun",
+             1 : "Souterrain - tunnel",
+             2 : "Pont - autopont",
+             3 : "Bretelle d’échangeur ou de raccordement",
+             4 : "Voie ferrée",
+             5 : "Carrefour aménagé",
+             6 : "Zone piétonne",
+             7 : "Zone de péage",
+             8 : "Chantier",
+             9 : "Autres"}
+
+dic_age_cls = {0:'0-15',
+               1:'16-25',
+               2:'26-45',
+               3:'46-65',
+               4:'66-'}
+
+dic_joursem = {0:'lundi',
+               1:'mardi',
+               2:'mercredi',
+               3:'jeudi',
+               4:'vendredi',
+               5:'samedi',
+               6:'dimanche'}
 
 dic_secu1 = {'def': 'Equipement de sécurité 1',
              -1: 'Non renseigné',
@@ -385,6 +448,35 @@ dic_dep = {1:"Ain",
            986:"Wallis-et-Fotuna",
            987:"Polynésie Française",
            988:"Nouvelle-Calédonie"}
+
+dic_feat_mods = {'dep':dic_dep,
+                 'catv':dic_catv,
+                 'catr':dic_catr,
+                 'col':dic_col,
+                 'agg':dic_agg,
+                 'trajet':dic_trajet,
+                 'mois':dic_mois,
+                 'catu':dic_catu,
+                 'situ':dic_situ,
+                 'place':dic_place,
+                 'sexe':dic_sexe,
+                 'catr':dic_catr,
+                 'locp':dic_locp,
+                 'etatp':dic_etatp,
+                 'lum':dic_lum,
+                 'int':dic_int,
+                 'atm':dic_atm,
+                 'circ':dic_circ,
+                 'nbv':dic_nbv,
+                 'vosp':dic_vosp,
+                 'prof':dic_prof,
+                 'plan':dic_plan,
+                 'surf':dic_surf,
+                 'infra':dic_infra,
+                 'situ':dic_situ,
+                 'joursem':dic_joursem,
+                 'age_cls':dic_age_cls}
+
 def get_key_from_value(dict, val):
     keys = [k for k, v in dict.items() if v == val]
     if keys:

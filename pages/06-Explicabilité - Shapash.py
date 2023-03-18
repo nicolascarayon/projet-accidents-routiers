@@ -3,12 +3,24 @@ import streamlit as st
 import my_libs.ref_labels as refs
 from pages.libs import comp, utils
 from joblib import load
-
 comp.sidebar_info()
+
 comp.header("Explicabilité du modèle Catboost à l'aide de la librairie Shapash")
+
 tab_shap, tab_app_cb = st.tabs(["Valeurs de Shapley", "Application sur CatBoost"])
 
-# if 'acc_grav_only' in st.session_state.keys(): print(st.session_state.acc_grav_only)
+feats = ['dep','catv','catr','col','agg','trajet','mois','catu','situ','place','sexe','catr','locp','etatp','lum',
+         'int','atm','circ','nbv','vosp','prof','plan','surf','infra','situ','joursem','age_cls']
+def disp_acc_labels():
+    st.write("")
+    for feat in feats:
+        st.write(f"**{refs.dic_features[feat]}**")
+
+def disp_acc_values(X_acc):
+    for feat in feats:
+        dict_feat = refs.dic_feat_mods[feat]
+        st.write(f"{dict_feat[int(X_acc[feat])]}")
+
 
 with tab_shap:
     comp.subheader("Valeurs de Shapley")
@@ -74,38 +86,19 @@ with tab_app_cb:
     with col_index:
         index = st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index")
 
-    col1, col2, col3 = st.columns([0.8, 1, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        col_label, col_value = st.columns([0.6, 1])
+        col_label, col_value = st.columns([0.8, 1])
 
         with col_label:
-            st.write("")
-            st.write(f"**Département**")
-            st.write(f"**Catégorie de véhicule**")
-            st.write("**Catégorie de route**")
-            st.write("**Type de collision**")
-            st.write("**Localisation**")
-            st.write("**Motif du déplacement**")
-            st.write("**Mois**")
-            st.write("**Catégorie d'usager**")
-            st.write("**Situation de l'accident**")
-            st.write("**Place de l'usager**")
+            disp_acc_labels()
 
         with col_value:
             st.write("")
             if st.session_state['X_acc'] is not None:
                 X_acc = st.session_state['X_acc']
-                st.write(f"{refs.dic_dep[int(X_acc.dep)]}")
-                st.write(f"{refs.dic_catv[int(X_acc.catv)]}")
-                st.write(f"{refs.dic_catr[int(X_acc.catr)]}")
-                st.write(f"{refs.dic_col[int(X_acc.col)]}")
-                st.write(f"{refs.dic_agg[int(X_acc['agg'])]}")
-                st.write(f"{refs.dic_trajet[int(X_acc.trajet)]}")
-                st.write(f"{refs.dic_mois[int(X_acc.mois)]}")
-                st.write(f"{refs.dic_catu[int(X_acc.catu)]}")
-                st.write(f"{refs.dic_situ[int(X_acc.situ)]}")
-                st.write(f"{refs.dic_place[int(X_acc.place)]}")
+                disp_acc_values(X_acc)
 
     with col2:
         col_graph_densities, col_diagnosis = st.columns([1, 1])
