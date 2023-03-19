@@ -27,8 +27,6 @@ def get_local_summary_plot(df):
     data = data.sort_values(by='contrib', ascending=False)
 
     fig = plt.figure(figsize=(8, 12))
-    # sns.set_color_codes("pastel")
-    # sns.barplot(x="contrib", y="feature", data=data, alpha=0.6)
     colors = ['lightskyblue' if x < 0 else 'orange' for x in data['contrib']]
     sns.barplot(x="contrib", y="feature", data=data, alpha=0.5, palette=colors)
     plt.grid(axis='x', linestyle='--')
@@ -393,7 +391,7 @@ def plot_prob_densities(model, X_test, y_test, index):
 
     fig = plt.figure(figsize=(12, 12))
     sns.kdeplot(y_pred_proba[:, 0], shade=True, cut=0, label="Grave", color="darkorange")
-    # plt.legend(loc='upper center')
+    plt.tick_params(axis='x', labelsize=20)
     if y_pred_prob_single is not None: plt.axvline(x=y_pred_prob_single, color='r', linestyle='--', linewidth=4)
 
     return fig, y_pred_prob_single, y_true
@@ -431,18 +429,3 @@ def get_smart_xpl(model, X_test, y_test):
         y_target=y_test,  # Optional: allows to display True Values vs Predicted Values
     )
     return xpl
-
-
-def get_local_explanation(xpl, ind):
-    # local_summary = xpl.summarize(row_num=ind)
-    # # Display the local explanation summary in a readable format
-    # local_summary.to_pandas()
-    # Plot the local explanation
-    # xpl.plot.config.backend = "matplotlib"
-
-    fig = plt.figure(figsize=(3, 3))
-    summary_df = xpl.to_pandas(proba=True)
-    xpl.plot.local_plot(row_num=ind)
-    # fig, _ = xpl.plot.local_plot(index=individual_index)
-
-    return fig, summary_df
