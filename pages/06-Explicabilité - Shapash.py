@@ -8,9 +8,33 @@ comp.sidebar_info()
 comp.header("Explicabilité du modèle Catboost à l'aide de la librairie Shapash")
 
 tab_shap, tab_app_cb = st.tabs(["Valeurs de Shapley", "Application sur CatBoost"])
+feats = ['catv',
+         'dep',
+         'catr',
+         'col',
+         'trajet',
+         'agg',
+         'place',
+         'int',
+         'etatp',
+         'mois',
+         'sexe',
+         'situ',
+         'age_cls',
+         'atm',
+         'lum',
+         'nbv',
+         'catu',
+         'plan',
+         'surf',
+         'circ',
+         'locp',
+         'vosp',
+         'prof',
+         'infra',
+         'joursem']
 
-feats = ['dep','catv','catr','col','agg','trajet','mois','catu','situ','place','sexe','catr','locp','etatp','lum',
-         'int','atm','circ','nbv','vosp','prof','plan','surf','infra','situ','joursem','age_cls']
+
 def disp_acc_labels():
     st.write("")
     for feat in feats:
