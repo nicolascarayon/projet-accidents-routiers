@@ -23,7 +23,7 @@ st.markdown("""
             - ##### Mettre en évidence et comprendre l'origine de leurs limites
             """)
 
-comp.subheader("Variable cible")
-st.markdown("""
-            - ##### Gravité des blessures subies par un usager de la route impliqué dans un accident
-            """)
+# comp.subheader("Variable cible")
+# st.markdown("""
+#             - ##### Gravité des blessures subies par un usager de la route impliqué dans un accident
+#             """)

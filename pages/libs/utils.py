@@ -38,7 +38,7 @@ def get_local_summary_plot(df):
     return fig
 
 
-def get_random_accident(data_test, y_pred, y_pred_proba, acc_types, pred_types, threshold):
+def get_random_accident(data_test, y_pred, acc_types, pred_types):
     acc_grav_val, pred_types_val = [], []
 
     for val in acc_types: acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
@@ -49,23 +49,17 @@ def get_random_accident(data_test, y_pred, y_pred_proba, acc_types, pred_types, 
 
     data_test_filtered = data_test[data_test.grav.isin(acc_grav_val)]
     y_pred_filtered = y_pred[data_test.grav.isin(acc_grav_val)]
-    y_pred_proba_filtered = y_pred_proba[data_test.grav.isin(acc_grav_val)]
 
     i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
     data_test_acc = data_test_filtered.iloc[i, :]
     y_pred_acc = y_pred_filtered.iloc[i]
-    y_pred_proba_acc = y_pred_proba_filtered[i]
 
     # look for a good prediction
     if pred_types == [refs.dic_pred_type[0]]:
-        # while (data_test_acc.grav != y_pred_acc) or (y_pred_proba_acc[1]*100 < threshold):
-        while ((data_test_acc.grav!=1) or (y_pred_acc!=1) or (y_pred_proba_acc[1]*100 < threshold)) \
-                and ((data_test_acc.grav!=0) or (y_pred_acc!=0) or (100-y_pred_proba_acc[1]*100) < threshold):
-
+        while (data_test_acc.grav != y_pred_acc):
             i = int(np.random.uniform(low=0, high=data_test_filtered.shape[0] - 1))
             data_test_acc = data_test_filtered.iloc[i, :]
             y_pred_acc = y_pred_filtered.iloc[i]
-            y_pred_proba_acc = y_pred_proba_filtered[i]
 
     # look for a wrong prediction
     if pred_types == [refs.dic_pred_type[1]]:

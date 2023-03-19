@@ -10,13 +10,14 @@ tab_ctr, tab_dt, tab_rf, tab_gb, tab_cb, tab_comp = st.tabs(["Contraintes", "Dec
                                                                       "Random Forests", "Gradient Boosting", "CatBoost", "Comparatif"])
 
 with tab_ctr:
-    st.markdown("- ##### Données tabulaires")
-    st.markdown("- ##### Données essentiellement catégorielles")
-    st.markdown("- ##### Recherche d'un modèle explicable")
-    st.markdown("- ##### Temps et moyens matériels limités")
-
+    
     col_models, col_pic_models = st.columns([1, 1])
     with col_models:
+        st.markdown("- ##### Données tabulaires")
+        st.markdown("- ##### Données essentiellement catégorielles")
+        st.markdown("- ##### Recherche d'un modèle explicable")
+        st.markdown("- ##### Temps et moyens matériels limités")
+
         comp.subheader("Choix d'algorithmes basés sur les arbres de décision")
         st.markdown("- ##### 1. Modèle simple : Decision Tree")
         st.markdown("- ##### 2. Aggrégation de modèles simples : Random Forests")
@@ -49,7 +50,6 @@ with tab_dt:
             st.image("./pics/dt-classif-report.png", width=500)
         with col2:
             st.image("./pics/dt-confusion.png", width=250)
-
 
 with tab_rf:
     comp.subheader("Random Forest")
