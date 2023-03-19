@@ -43,12 +43,11 @@ def get_local_summary_plot(df):
 def get_random_accident(data_test, y_pred, acc_types, pred_types):
     acc_grav_val, pred_types_val = [], []
 
-    if len(acc_types) == 0 and len(pred_types) == 0: return None, None, None
+    for val in acc_types: acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
+    for val in pred_types: pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
 
-    for val in acc_types:
-        acc_grav_val.append(refs.get_key_from_value(refs.dic_grav_sht, val))
-    for val in pred_types:
-        pred_types_val.append(refs.get_key_from_value(refs.dic_pred_type, val))
+    if len(acc_grav_val) == 0: acc_grav_val = [0, 1]
+    if len(pred_types_val) == 0: pred_types_val = [0, 1]
 
     data_test_filtered = data_test[data_test.grav.isin(acc_grav_val)]
     y_pred_filtered = y_pred[data_test.grav.isin(acc_grav_val)]
