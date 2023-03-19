@@ -70,11 +70,12 @@ with tab_app_cb:
     if 'y_test'     not in st.session_state.keys(): st.session_state['y_test']     = st.session_state['data_test'].grav
     if 'acc_types'  not in st.session_state.keys(): st.session_state['acc_types']  = [refs.dic_grav_sht[0], refs.dic_grav_sht[1]]
     if 'pred_types' not in st.session_state.keys(): st.session_state['pred_types'] = [refs.dic_pred_type[0], refs.dic_pred_type[1]]
-    if 'prob_tresh' not in st.session_state.keys(): st.session_state['prob_tresh'] = 50
+    if 'threshold'  not in st.session_state.keys(): st.session_state['threshold'] = 50
     if 'xpl'        not in st.session_state.keys():
         st.session_state['xpl'] = utils.get_smart_xpl(st.session_state.model, st.session_state.X_test,
                                                       st.session_state.y_test)
         st.session_state['y_pred'] = pd.Series(st.session_state.model.predict(st.session_state.X_test))
+        st.session_state['y_pred_proba'] = st.session_state.model.predict_proba(st.session_state.X_test)
         st.session_state.y_pred.index = st.session_state.X_test.index
         st.session_state.xpl.compile(
             x=st.session_state.X_test,
@@ -87,8 +88,10 @@ with tab_app_cb:
             st.session_state['y_acc'], \
             st.session_state['index'] = utils.get_random_accident(st.session_state.data_test,
                                                                   st.session_state.y_pred,
+                                                                  st.session_state.y_pred_proba,
                                                                   st.session_state.acc_types,
-                                                                  st.session_state.pred_types)
+                                                                  st.session_state.pred_types,
+                                                                  st.session_state.threshold)
 
     # Options
     col_cb_acc_grave, col_pred_type, col_threshold, col_btn, col_index, col_empty = st.columns([2, 2, 2, 0.8, 1, 2.2])
@@ -100,8 +103,9 @@ with tab_app_cb:
         st.session_state.pred_types = st.multiselect(label="Prédiction", options=refs.dic_pred_type.values(), label_visibility="collapsed")
 
     with col_threshold:
-        st.session_state.prob_tresh = st.slider(label="Niveau de confiance", label_visibility="collapsed", value=st.session_state.prob_tresh)
-        print(f"st.session_state.prob_tresh : {st.session_state.prob_tresh}")
+        slider_disabled = False if st.session_state.pred_types == [refs.dic_pred_type[0]] else True
+        st.session_state.threshold = st.slider(label="Niveau de confiance", label_visibility="collapsed",
+                                               value=st.session_state.threshold, disabled=slider_disabled)
 
     with col_btn:
         if st.button('Accident'):
@@ -110,8 +114,10 @@ with tab_app_cb:
             st.session_state['X_acc'], st.session_state['y_acc'], st.session_state['index'] = utils.get_random_accident(
                 st.session_state.data_test,
                 st.session_state.y_pred,
+                st.session_state.y_pred_proba,
                 st.session_state.acc_types,
-                st.session_state.pred_types)
+                st.session_state.pred_types,
+                st.session_state.threshold)
 
     with col_index:
         st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index", disabled=True)
@@ -153,6 +159,5 @@ with tab_app_cb:
     with col_shap:
         st.subheader("Contribution par feature")
         if st.session_state['index'] is not None:
-            print('coucou')
             fig = utils.get_local_summary_plot(st.session_state.summary_df.loc[st.session_state.index])
             st.pyplot(fig)
