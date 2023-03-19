@@ -46,6 +46,7 @@ with tab_app_cb:
     if 'y_test'     not in st.session_state.keys(): st.session_state['y_test']     = st.session_state['data_test'].grav
     if 'acc_types'  not in st.session_state.keys(): st.session_state['acc_types']  = [refs.dic_grav_sht[0], refs.dic_grav_sht[1]]
     if 'pred_types' not in st.session_state.keys(): st.session_state['pred_types'] = [refs.dic_pred_type[0], refs.dic_pred_type[1]]
+    if 'prob_tresh' not in st.session_state.keys(): st.session_state['prob_tresh'] = 50
     if 'xpl'        not in st.session_state.keys():
         st.session_state['xpl'] = utils.get_smart_xpl(st.session_state.model, st.session_state.X_test,
                                                       st.session_state.y_test)
@@ -66,13 +67,17 @@ with tab_app_cb:
                                                                   st.session_state.pred_types)
 
     # Options
-    col_cb_acc_grave, col_pred_type, col_btn, col_index, col_empty = st.columns([3, 4, 1, 1, 6])
+    col_cb_acc_grave, col_pred_type, col_threshold, col_btn, col_index, col_empty = st.columns([2, 2, 2, 0.8, 1, 2.2])
 
     with col_cb_acc_grave:
         st.session_state.acc_types = st.multiselect(label="Type d'accident", options=refs.dic_grav_sht.values(), label_visibility="collapsed")
 
     with col_pred_type:
         st.session_state.pred_types = st.multiselect(label="Prédiction", options=refs.dic_pred_type.values(), label_visibility="collapsed")
+
+    with col_threshold:
+        st.session_state.prob_tresh = st.slider(label="Niveau de confiance", label_visibility="collapsed", value=st.session_state.prob_tresh)
+        print(f"st.session_state.prob_tresh : {st.session_state.prob_tresh}")
 
     with col_btn:
         if st.button('Accident'):
@@ -85,7 +90,8 @@ with tab_app_cb:
                 st.session_state.pred_types)
 
     with col_index:
-        st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index")
+        st.text_input(label="index", label_visibility="collapsed", value=st.session_state.index, placeholder="index", disabled=True)
+
 
     # Results
     col_acc, col_pred, col_shap = st.columns([1, 0.8, 1])
@@ -123,5 +129,6 @@ with tab_app_cb:
     with col_shap:
         st.subheader("Contribution par feature")
         if st.session_state['index'] is not None:
+            print('coucou')
             fig = utils.get_local_summary_plot(st.session_state.summary_df.loc[st.session_state.index])
             st.pyplot(fig)
