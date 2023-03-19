@@ -67,12 +67,6 @@ def get_random_accident(data_test, y_pred, y_pred_proba, acc_types, pred_types, 
             y_pred_acc = y_pred_filtered.iloc[i]
             y_pred_proba_acc = y_pred_proba_filtered[i]
 
-            print(f"\ndata_test_acc.grav : {data_test_acc.grav}")
-            print(f"y_pred_acc : {y_pred_acc}")
-            print(f"y_pred_proba_acc[1]*100 : {y_pred_proba_acc[1]*100}")
-            print(f"threshold : {threshold}\n")
-
-
     # look for a wrong prediction
     if pred_types == [refs.dic_pred_type[1]]:
         while (data_test_acc.grav == y_pred_acc):
