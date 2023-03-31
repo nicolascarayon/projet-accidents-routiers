@@ -23,7 +23,7 @@ with col1:
     st.header("Application du Machine Learning dans le cadre de la")
     st.header("prédiction de gravité d'accidents routiers")
 with col2:
-    st.image("./pics/CarCrash2.jpg", width=400)
+    st.image("./pics/CarCrash2.JPG", width=400)
 
 
 

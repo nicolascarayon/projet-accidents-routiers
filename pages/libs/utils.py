@@ -7,8 +7,8 @@ from my_libs import lib_tools as pt
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
-
+# DIR_DATA_GOUV = ".\\data\\data_gouv_fr\\"
+DIR_DATA_GOUV = "./data/data_gouv_fr/"
 
 def get_local_summary_plot(df):
     feat_names = []
